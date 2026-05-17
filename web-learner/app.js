@@ -243,31 +243,9 @@ function updatePreview() {
     const studentCss = cssEditor.getValue();
     const html = problems[currentIdx].html;
 
-    // Magic Reveal: 학생이 작성한 선택자만 표시
-    const selectorRegex = /([#\.a-zA-Z0-9_-]+)\s*\{/g;
-    let match;
-    const revealSelectors = [];
-    while ((match = selectorRegex.exec(studentCss)) !== null) {
-        const sel = match[1].trim();
-        if (sel !== '*' && sel !== 'html' && sel !== 'body') revealSelectors.push(sel);
-    }
-
-    const rootMatch = html.match(/id="([^"]+)"/);
-    const rootId = rootMatch ? '#' + rootMatch[1] : 'body';
-
-    let revealStyle = `
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Malgun Gothic',sans-serif; padding:10px; background:#fff; }
-        ${rootId} > * { display: none !important; }
-    `;
-    if (revealSelectors.length > 0) {
-        revealSelectors.forEach(sel => {
-            revealStyle += `${sel} { display: block !important; }\n`;
-            revealStyle += `${rootId} { display: block !important; }\n`;
-        });
-    }
-
-    const content = `<html><head><style>${revealStyle}\n${studentCss}</style></head><body>${html}</body></html>`;
+    // HTML 내의 <style> 닫는 태그 직전에 학생 CSS를 삽입
+    const content = html.replace('</style>', `${studentCss}\n    </style>`);
+    
     const doc = previewFrame.contentWindow.document;
     doc.open(); doc.write(content); doc.close();
     setTimeout(() => injectClickInspector(previewFrame.contentWindow.document), 20);
@@ -275,7 +253,10 @@ function updatePreview() {
 
 function updateGhost() {
     const cur = problems[currentIdx];
-    const content = `<html><head><style>${cur.answerCss}</style></head><body>${cur.html}</body></html>`;
+    
+    // HTML 내의 <style> 닫는 태그 직전에 정답 CSS를 삽입
+    const content = cur.html.replace('</style>', `${cur.answerCss}\n    </style>`);
+    
     const doc = ghostFrame.contentWindow.document;
     doc.open(); doc.write(content); doc.close();
 }
