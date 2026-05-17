@@ -9,6 +9,84 @@ let problems = [];
 let currentIdx = 0;
 let savedCode = {};  // { idx: cssCode } — 학생 입력 보존
 
+// ─── HTML에서 <style> 블록 분리 ───
+function extractAndStripStyle(fullHtml) {
+    const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
+    let extractedCss = '';
+    let match;
+    while ((match = styleRegex.exec(fullHtml)) !== null) {
+        extractedCss += match[1].trim() + '\n';
+    }
+    // <style> 블록 제거
+    const strippedHtml = fullHtml.replace(styleRegex, '').trim();
+    return { html: strippedHtml, css: extractedCss.trim() };
+}
+
+// ─── CSS에서 조건표 자동 생성 ───
+function autoGenerateConditions(cssText) {
+    const conditions = [];
+    // @media 블록을 제외한 일반 룰만 추출
+    const noMedia = cssText.replace(/@media[^{]+\{[\s\S]*?\}\s*\}/g, '');
+    const ruleRegex = /([^{}@]+)\{([^}]+)\}/g;
+    let match;
+    while ((match = ruleRegex.exec(noMedia)) !== null) {
+        const selector = match[1].trim();
+        const propsStr = match[2].trim();
+        if (!selector || !propsStr) continue;
+
+        // 속성 요약 생성
+        const propNames = propsStr.split(';')
+            .map(p => p.split(':')[0]?.trim())
+            .filter(p => p);
+        const desc = `${selector}에 ${propNames.slice(0, 3).join(', ')}${propNames.length > 3 ? ' 등' : ''}을 설정한다.`;
+        const cssCode = `${selector} { ${propsStr} }`;
+
+        const checks = [];
+        const props = {};
+        propsStr.split(';').forEach(p => {
+            const colonIdx = p.indexOf(':');
+            if (colonIdx > 0) {
+                const prop = p.substring(0, colonIdx).trim();
+                const val = p.substring(colonIdx + 1).trim();
+                if (prop && val) props[prop] = val;
+            }
+        });
+        if (Object.keys(props).length > 0) {
+            checks.push({ selector, props });
+        }
+        conditions.push({ desc, cssCode, checks });
+    }
+    return conditions;
+}
+
+// ─── 조건이 실제 HTML과 매칭되는지 검증 ───
+function validateConditions(conditions, htmlText) {
+    if (conditions.length === 0) return false;
+    // 조건의 선택자 중 최소 절반이 HTML에 존재하는지 확인
+    let matchCount = 0;
+    for (const cond of conditions) {
+        for (const check of cond.checks) {
+            const sel = check.selector;
+            // id 선택자: #xxx → id="xxx"
+            if (sel.startsWith('#')) {
+                const id = sel.substring(1);
+                if (htmlText.includes(`id="${id}"`)) matchCount++;
+            }
+            // class 선택자: .xxx → class="...xxx..."
+            else if (sel.startsWith('.')) {
+                const cls = sel.substring(1).split('.')[0]; // 첫 클래스만
+                if (htmlText.includes(cls)) matchCount++;
+            }
+            // 태그 선택자
+            else if (/^[a-z]+$/i.test(sel)) {
+                if (htmlText.includes(`<${sel}`)) matchCount++;
+            }
+        }
+    }
+    const totalChecks = conditions.reduce((sum, c) => sum + c.checks.length, 0);
+    return totalChecks > 0 && (matchCount / totalChecks) >= 0.4;
+}
+
 // ─── 파일 로드 ───
 async function loadProblems() {
     const t = Date.now();
@@ -19,17 +97,34 @@ async function loadProblems() {
     // 2. 각 문제 폴더에서 파일 로드
     for (let i = 0; i < titles.length; i++) {
         const folder = `problems/${i + 1}`;
-        const [html, css, condText] = await Promise.all([
+        const [rawHtml, cssFile, condText] = await Promise.all([
             fetch(`${folder}/code.html?t=${t}`).then(r => r.text()),
             fetch(`${folder}/answer.css?t=${t}`).then(r => r.text()),
             fetch(`${folder}/conditions.txt?t=${t}`).then(r => r.text())
         ]);
 
+        // HTML에서 <style> 자동 분리
+        const extracted = extractAndStripStyle(rawHtml);
+        const htmlOnly = extracted.html;
+        const extractedCss = extracted.css;
+
+        // 정답 CSS 결정: answer.css가 있으면 사용, 없으면 HTML에서 추출한 CSS 사용
+        const answerCss = cssFile.trim() || extractedCss;
+
+        // 조건표 파싱 후 검증
+        let conditions = parseConditions(condText);
+        const isValid = validateConditions(conditions, htmlOnly);
+
+        // 조건이 HTML과 맞지 않으면 CSS에서 자동 생성
+        if (!isValid && answerCss) {
+            conditions = autoGenerateConditions(answerCss);
+        }
+
         problems.push({
             title: titles[i].trim(),
-            html: html.trim(),
-            answerCss: css.trim(),
-            conditions: parseConditions(condText)
+            html: htmlOnly,
+            answerCss: answerCss,
+            conditions: conditions
         });
     }
 }
