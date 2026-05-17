@@ -5,6 +5,13 @@
 
 let htmlViewer, cssEditor;
 let previewFrame, ghostFrame, conditionList;
+const CSS_DEFAULT = '<style>\n    /* 여기에 CSS를 작성하세요 */\n\n</style>';
+
+// ─── 에디터에서 순수 CSS만 추출 (style 태그 제거) ───
+function getStudentCss() {
+    const raw = cssEditor.getValue();
+    return raw.replace(/<\/?style[^>]*>/gi, '').trim();
+}
 let problems = [];
 let currentIdx = 0;
 let savedCode = {};  // { idx: cssCode } — 학생 입력 보존
@@ -200,7 +207,7 @@ function switchProblem(idx) {
 
     // CSS 에디터 복원
     const prev = savedCode[idx];
-    cssEditor.setValue(prev || "/* 여기에 CSS를 작성하세요 */\n\n");
+    cssEditor.setValue(prev || CSS_DEFAULT);
 
     // 조건표 & 프리뷰 갱신
     renderConditions();
@@ -225,8 +232,8 @@ function initEditor() {
 
     // CSS Editor
     cssEditor = CodeMirror(document.getElementById('css-editor-container'), {
-        value: "/* 여기에 CSS를 작성하세요 */\n\n",
-        mode: "css", theme: "dracula",
+        value: CSS_DEFAULT,
+        mode: "htmlmixed", theme: "dracula",
         lineNumbers: true, autoCloseBrackets: true
     });
 
@@ -239,7 +246,7 @@ function initEditor() {
 
 // ─── Preview ───
 function updatePreview() {
-    const studentCss = cssEditor.getValue();
+    const studentCss = getStudentCss();
     const html = problems[currentIdx].html;
 
     // Magic Reveal: 학생이 작성한 선택자만 표시

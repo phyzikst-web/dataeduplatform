@@ -1,13 +1,16 @@
-구분	조건 설명	적용할 값
-1	전체 선택자(*)로 margin과 padding을 0으로 초기화하고, box-sizing을 border-box로 설정한다.	* { margin:0; padding:0; box-sizing:border-box; }
-2	body의 글꼴, 배경색, 글자색을 지정한다.	body { font-family:'Malgun Gothic', sans-serif; background:#f0f0f0; color:#222; }
-3	#portfolio의 너비를 1040px로 설정하고, 중앙 정렬한다.	#portfolio { width:1040px; margin:0 auto; }
-4	#hero의 배경색 #2d3436, 글자색 white, 텍스트 중앙 정렬을 적용한다.	#hero { background:#2d3436; color:white; text-align:center; padding:40px 32px; }
-5	#category-nav의 배경색 #636e72, overflow:hidden을 적용한다.	#category-nav { background:#636e72; overflow:hidden; }
-6	#category-nav li를 float:left로 가로 배치한다.	#category-nav li { list-style:none; float:left; padding:14px 30px; color:white; }
-7	#gallery-section에 배경색 white, overflow:hidden을 적용한다.	#gallery-section { background:white; padding:24px; overflow:hidden; }
-8	.gallery-grid에 overflow:hidden을 적용한다.	.gallery-grid { overflow:hidden; }
-9	.card를 float:left, 너비 30%로 가로 배치한다.	.card { float:left; width:30%; margin:1.5%; }
-10	.card.large의 너비를 63%로 설정한다.	.card.large { width:63%; }
-11	.card-img의 높이를 120px로, 배경색을 #dfe6e9로 설정한다.	.card-img { height:120px; background:#dfe6e9; }
-12	#contact에 clear:both, 배경색 #2d3436, 텍스트 중앙 정렬을 적용한다.	#contact { clear:both; background:#2d3436; text-align:center; padding:20px; }
+번호	조건 설명	적용할 값
+1	전체 선택자로 margin, padding을 0으로 초기화하고 box-sizing을 border-box로 설정한다.	0 / 0 / border-box
+2	body에 글꼴 Helvetica(sans-serif 대체), 배경색 #f4f4f6, 글자색 #111을 설정한다.	Helvetica,sans-serif / #f4f4f6 / #111
+3	header에 배경색 white, text-align:center, padding:30px을 적용하고, border-bottom:3px solid #111로 굵은 하단 구분선을 넣는다. h1의 글자 크기는 2.5rem, letter-spacing은 -1px로 설정한다.	white / center / 30px / 3px solid #111  |  2.5rem / -1px
+4	.magazine-container에 display:grid, grid-template-columns:200px 1fr 250px을 적용하여 왼쪽 사이드바(200px) - 본문(나머지) - 오른쪽 사이드바(250px)의 3단 구조를 만든다.	grid / 200px 1fr 250px
+5	.magazine-container에 max-width:1300px, margin:30px auto, gap:20px, padding:0 20px을 설정한다.	1300px / 30px auto / 20px / 0 20px
+6	.sidebar-left에 background:white, padding:20px, border-radius:4px을 적용한다. ul에 list-style:none, li에 padding:10px 0, border-bottom:1px solid #eee, font-weight:bold을 적용한다.	white / 20px / 4px  |  none  |  10px 0 / 1px solid #eee / bold
+7	.main-content에 display:flex, flex-direction:column, gap:20px을 적용하여 기사들을 세로로 배치한다.	flex / column / 20px
+8	.main-article에 background:white, padding:25px, border-radius:4px, border-top:4px solid #111을 적용한다.	white / 25px / 4px / 4px solid #111
+9	.article-img에 height:250px, background:#ddd, margin-bottom:15px을 설정하고 display:flex, align-items:center, justify-content:center, font-size:1.2rem, font-weight:bold으로 텍스트를 가운데 정렬한다.	250px / #ddd / 15px / flex / center / center / 1.2rem / bold
+10	.sidebar-right에 background:white, padding:20px, border-radius:4px을 적용한다.	white / 20px / 4px
+11	.widget에 background:#f9f9f9, padding:15px, margin-bottom:15px, border:1px dashed #aaa, text-align:center를 적용한다.	#f9f9f9 / 15px / 15px / 1px dashed #aaa / center
+12	1024px 이하에서 .magazine-container의 grid-template-columns를 200px 1fr로 변경하여 오른쪽 사이드바를 레이아웃에서 제외한다. .sidebar-right에 display:none을 적용하여 화면에서 완전히 숨긴다.	200px 1fr  |  none
+13	768px 이하에서 .magazine-container의 grid-template-columns를 1fr로 변경하여 완전한 1단 구조로 만들고, margin을 15px auto로 축소한다.	1fr / 15px auto
+14	768px 이하에서 .sidebar-left에 display:none을 적용하여 카테고리 메뉴를 화면에서 완전히 숨긴다.	none
+15	768px 이하에서 header h1의 글자 크기를 1.8rem으로 축소한다.	1.8rem
