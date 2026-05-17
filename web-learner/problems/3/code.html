@@ -1,46 +1,70 @@
-<div id="portfolio">
-    <header id="hero">
-      <h1>Creative Portfolio</h1>
-      <p class="subtitle">디자인 & 개발 작품 모음</p>
-    </header>
-    <nav id="category-nav">
-      <ul>
-        <li class="active">전체</li>
-        <li>웹 디자인</li>
-        <li>앱 개발</li>
-        <li>브랜딩</li>
-      </ul>
-    </nav>
-    <div id="gallery-section">
-      <div class="gallery-grid">
-        <div class="card large">
-          <div class="card-img"></div>
-          <h3>E-Commerce 리디자인</h3>
-          <p>사용자 경험 중심의 쇼핑몰 UI/UX 개선 프로젝트</p>
-        </div>
-        <div class="card">
-          <div class="card-img"></div>
-          <h3>날씨 앱</h3>
-          <p>실시간 기상 데이터 시각화</p>
-        </div>
-        <div class="card">
-          <div class="card-img"></div>
-          <h3>브랜드 로고</h3>
-          <p>스타트업 CI/BI 디자인</p>
-        </div>
-        <div class="card">
-          <div class="card-img"></div>
-          <h3>대시보드</h3>
-          <p>데이터 분석 대시보드 UI</p>
-        </div>
-        <div class="card">
-          <div class="card-img"></div>
-          <h3>SNS 플랫폼</h3>
-          <p>커뮤니티 기반 소셜 서비스</p>
-        </div>
-      </div>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>반응형 매거진</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Helvetica', sans-serif; background: #f4f4f6; color: #111; }
+        header { background: #fff; text-align: center; padding: 30px;
+                 border-bottom: 3px solid #111; }
+        header h1 { font-size: 2.5rem; letter-spacing: -1px; }
+        .magazine-container {
+            display: grid;
+            grid-template-columns: 200px 1fr 250px;
+            max-width: 1300px;
+            margin: 30px auto;
+            gap: 20px;
+            padding: 0 20px;
+        }
+        .sidebar-left { background: #fff; padding: 20px; border-radius: 4px; }
+        .sidebar-left ul { list-style: none; }
+        .sidebar-left li { padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; }
+        .main-content { display: flex; flex-direction: column; gap: 20px; }
+        .main-article { background: #fff; padding: 25px;
+                        border-radius: 4px; border-top: 4px solid #111; }
+        .article-img { height: 250px; background: #ddd; margin-bottom: 15px;
+                       display: flex; align-items: center; justify-content: center;
+                       font-size: 1.2rem; font-weight: bold; }
+        .sidebar-right { background: #fff; padding: 20px; border-radius: 4px; }
+        .widget { background: #f9f9f9; padding: 15px; margin-bottom: 15px;
+                  border: 1px dashed #aaa; text-align: center; }
+        @media screen and (max-width: 1024px) {
+            .magazine-container { grid-template-columns: 200px 1fr; }
+            .sidebar-right { display: none; }
+        }
+        @media screen and (max-width: 768px) {
+            .magazine-container { grid-template-columns: 1fr; margin: 15px auto; }
+            .sidebar-left { display: none; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <header><h1>THE DAILY RESPONSIVE</h1></header>
+    <div class="magazine-container">
+        <aside class="sidebar-left">
+            <h3>카테고리</h3>
+            <ul><li>정치/경제</li><li>IT/과학</li><li>문화/생활</li><li>스포츠</li></ul>
+        </aside>
+        <main class="main-content">
+            <article class="main-article">
+                <div class="article-img">메인 보도 레이아웃 이미지 공간</div>
+                <h2>[속보] 반응형 웹 디자인, 교육 현장 실습 열기 뜨거워</h2>
+                <p style="color:#666; margin-top:10px;">학생들이 직접 미디어 쿼리를 다루며 기기별 제어 방식을 익히고 있습니다.</p>
+            </article>
+            <article class="main-article">
+                <h2>두 번째 주요 헤드라인 기사</h2>
+                <p style="color:#666; margin-top:10px;">텍스트 위주의 서브 콘텐츠 카드입니다.</p>
+            </article>
+        </main>
+        <aside class="sidebar-right">
+            <h3>인기 기사</h3>
+            <div class="widget">1위. CSS Grid 정복하기</div>
+            <div class="widget">2위. 미디어쿼리 버그 잡기</div>
+            <div class="widget">3위. 뷰포트 메타 태그의 비밀</div>
+        </aside>
     </div>
-    <footer id="contact">
-      <p>Contact: portfolio@example.com | © 2026 Creative Portfolio</p>
-    </footer>
-</div>
+</body>
+</html>

@@ -1,50 +1,61 @@
-<div id="wrap">
-    <header id="top-banner">
-      <h1>Daily News Portal</h1>
-      <p class="slogan">당신의 하루를 여는 뉴스</p>
-    </header>
-    <nav id="nav-bar">
-      <ul>
-        <li class="active">정치</li>
-        <li>경제</li>
-        <li>사회</li>
-        <li>IT/과학</li>
-        <li>문화</li>
-      </ul>
-    </nav>
-    <div id="body-area">
-      <div id="main-news">
-        <h2>헤드라인 뉴스</h2>
-        <div class="news-card featured">
-          <h3>AI 기술 발전이 교육 현장에 미치는 영향</h3>
-          <p>인공지능 기반 맞춤형 학습 시스템이 주목받고 있다...</p>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>카페 랜딩 페이지</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Noto Sans KR', sans-serif; background: #faf8f5; color: #4a3b32; }
+        .hero { height: 60vh; background: #d9c3b0;
+                display: flex; flex-direction: column;
+                justify-content: center; align-items: center;
+                text-align: center; padding: 20px; }
+        .hero h1 { font-size: 3rem; margin-bottom: 10px; }
+        .menu-section { max-width: 1200px; margin: 50px auto; padding: 20px; text-align: center; }
+        .menu-wrapper { display: flex; justify-content: center; gap: 30px; margin-top: 30px; }
+        .menu-item { background: #fff; width: 280px; border-radius: 12px;
+                     overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .menu-img  { height: 180px; background: #eadecf;
+                     display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .menu-desc { padding: 15px; }
+        .info-section { max-width: 1200px; margin: 50px auto; padding: 20px; display: flex; gap: 40px; }
+        .info-box { flex: 1; background: #fff; padding: 30px; border-radius: 12px; }
+        .map-placeholder { height: 200px; background: #eee; margin-top: 15px;
+                           display: flex; align-items: center; justify-content: center; }
+        @media screen and (max-width: 900px) {
+            .hero h1 { font-size: 2rem; }
+            .menu-wrapper { flex-wrap: wrap; gap: 20px; }
+            .menu-item { width: calc(50% - 10px); }
+            .info-section { flex-direction: column; gap: 20px; }
+        }
+        @media screen and (max-width: 480px) {
+            .menu-item { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <h1>CAFE RESPONSIVE</h1>
+        <p>매일 아침 볶는 신선한 원두와 특별한 디저트를 만나보세요.</p>
+    </section>
+    <section class="menu-section">
+        <h2>Signature Menu</h2>
+        <div class="menu-wrapper">
+            <div class="menu-item"><div class="menu-img">아메리카노</div>
+            <div class="menu-desc"><h3>에스프레소</h3><p>깊고 진한 풍미의 바디감</p></div></div>
+            <div class="menu-item"><div class="menu-img">카페라떼</div>
+            <div class="menu-desc"><h3>카페라떼</h3><p>부드러운 우유와의 조화</p></div></div>
+            <div class="menu-item"><div class="menu-img">크로플</div>
+            <div class="menu-desc"><h3>브라운 치즈 크로플</h3><p>단짠단짠의 정석 디저트</p></div></div>
         </div>
-        <div class="news-row">
-          <div class="news-card small">
-            <h4>반도체 시장 전망</h4>
-            <p>글로벌 반도체 수요 증가세...</p>
-          </div>
-          <div class="news-card small">
-            <h4>친환경 에너지 정책</h4>
-            <p>탄소중립 목표 달성을 위한...</p>
-          </div>
-          <div class="news-card small">
-            <h4>우주 탐사 신기록</h4>
-            <p>민간 우주기업 역할 확대...</p>
-          </div>
-        </div>
-      </div>
-      <aside id="side-bar">
-        <h3>인기 뉴스</h3>
-        <ol>
-          <li>실시간 검색어 1위 소식</li>
-          <li>주간 베스트 뉴스</li>
-          <li>오늘의 날씨 정보</li>
-          <li>주식 시장 동향</li>
-        </ol>
-      </aside>
-    </div>
-    <footer id="bottom-bar">
-      <p>© 2026 Daily News Portal. All rights reserved.</p>
-    </footer>
-</div>
+    </section>
+    <section class="info-section">
+        <div class="info-box"><h2>영업 시간</h2>
+        <p style="margin-top:15px;">평일: 09:00 - 22:00</p><p>주말: 10:00 - 21:00</p>
+        <p style="color:red; margin-top:10px;">* 매주 월요일 휴무</p></div>
+        <div class="info-box"><h2>오시는 길</h2>
+        <div class="map-placeholder">지도 API 위치 (대체 박스)</div></div>
+    </section>
+</body>
+</html>
