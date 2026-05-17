@@ -143,7 +143,8 @@ function parseConditions(text) {
         if (first === '구분' || first === '번호' || first === 'No' || first === 'no') continue;
 
         const desc = parts[1]?.trim() || '';
-        const cssCode = parts[2]?.trim() || '';
+        const rawVal = parts[2]?.trim() || '';
+        const cssCode = rawVal;
 
         // CSS 코드에서 selector { properties } 패턴 추출
         const checks = [];
@@ -166,7 +167,7 @@ function parseConditions(text) {
             }
         }
 
-        conditions.push({ desc, cssCode, checks });
+        conditions.push({ desc, cssCode, rawVal, checks });
     }
     return conditions;
 }
@@ -282,12 +283,36 @@ function updateGhost() {
 // ─── 조건표 렌더링 ───
 function renderConditions() {
     conditionList.innerHTML = '';
-    problems[currentIdx].conditions.forEach(c => {
-        const li = document.createElement('li');
-        li.className = 'check-item';
-        li.innerHTML = `<span class="status-icon">⭕</span><span>${c.desc}</span>`;
-        conditionList.appendChild(li);
+    const table = document.createElement('table');
+    table.className = 'condition-table';
+    
+    table.innerHTML = `
+        <thead>
+            <tr>
+                <th width="12%">번호</th>
+                <th width="50%">조건 설명</th>
+                <th width="38%">적용할 값</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    `;
+    const tbody = table.querySelector('tbody');
+
+    problems[currentIdx].conditions.forEach((c, i) => {
+        const tr = document.createElement('tr');
+        tr.className = 'check-item';
+        tr.innerHTML = `
+            <td style="text-align:center;">
+                <span class="status-icon">⭕</span><br>
+                <span style="font-weight:bold; color:#64748b; font-size:0.75rem;">${i + 1}</span>
+            </td>
+            <td>${c.desc}</td>
+            <td class="code-val">${c.rawVal || c.cssCode || ''}</td>
+        `;
+        tbody.appendChild(tr);
     });
+    
+    conditionList.appendChild(table);
     updatePreview();
 }
 
