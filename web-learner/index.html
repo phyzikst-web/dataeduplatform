@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Learner | HTML5 & CSS3 레이아웃 실습</title>
+    <!-- CSS / JS Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.5/split.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <nav class="navbar">
+            <div class="logo">Algo <span>Web Learner</span></div>
+            <div class="problem-tabs" id="problem-tabs">
+                <!-- Tabs are generated dynamically by app.js -->
+            </div>
+            <div class="nav-links">
+                <a href="../html5/index.html" class="nav-btn">← HTML5 홈</a>
+            </div>
+        </nav>
+
+        <main class="split-container" id="main-workspace">
+            <!-- Col 1: Instructions -->
+            <div id="instruction-panel" class="split">
+                <div class="panel-header">📝 실습 조건표</div>
+                <div class="panel-content">
+                    <p id="problem-desc">다음 조건을 만족하도록 CSS를 작성하여 레이아웃을 완성하세요.</p>
+                    <ul id="condition-list"></ul>
+                </div>
+            </div>
+
+            <!-- Col 2: HTML Viewer -->
+            <div id="html-panel" class="split">
+                <div class="panel-header">📄 HTML 구조</div>
+                <div class="editor-box" id="html-viewer-container"></div>
+            </div>
+
+            <!-- Col 3: CSS Editor -->
+            <div id="css-panel" class="split">
+                <div class="panel-header">🎨 CSS 스타일</div>
+                <div class="editor-box" id="css-editor-container"></div>
+            </div>
+
+            <!-- Col 4: Dual Preview -->
+            <div id="preview-panel" class="split">
+                <div class="preview-section" style="height:50%; border-bottom: 2px solid var(--border);">
+                    <div class="panel-header">🎯 정답 가이드</div>
+                    <div class="preview-wrapper">
+                        <iframe id="ghost-frame"></iframe>
+                    </div>
+                </div>
+                <div class="preview-section" style="height:50%;">
+                    <div class="panel-header">🚀 나의 결과</div>
+                    <div class="preview-wrapper">
+                        <iframe id="preview-frame"></iframe>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

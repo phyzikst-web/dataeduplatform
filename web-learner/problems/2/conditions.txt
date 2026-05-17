@@ -1,0 +1,13 @@
+구분	조건 설명	적용할 값
+1	전체 선택자(*)로 margin과 padding을 0으로 초기화하고, box-sizing을 border-box로 설정한다.	* { margin:0; padding:0; box-sizing:border-box; }
+2	body의 글꼴, 배경색, 글자색을 지정한다.	body { font-family:'Malgun Gothic', sans-serif; background:#eef1f5; color:#333; }
+3	#wrap의 너비를 1000px로 설정하고, 중앙 정렬한다.	#wrap { width:1000px; margin:0 auto; }
+4	#top-banner의 배경색을 #1a237e, 글자색 white로 설정한다.	#top-banner { background:#1a237e; color:white; padding:28px 32px; }
+5	#nav-bar의 배경색 #283593, overflow:hidden을 적용한다.	#nav-bar { background:#283593; overflow:hidden; }
+6	#nav-bar li를 float:left로 가로 배치한다.	#nav-bar li { list-style:none; float:left; padding:14px 28px; color:white; }
+7	#body-area에 overflow:hidden을 적용한다.	#body-area { overflow:hidden; background:white; }
+8	#main-news를 float:left, 너비 700px로 배치한다.	#main-news { float:left; width:700px; padding:24px; }
+9	#side-bar를 float:right, 너비 300px로 배치한다.	#side-bar { float:right; width:300px; background:#f5f5f5; padding:24px; }
+10	.news-row에 overflow:hidden을 적용한다.	.news-row { overflow:hidden; }
+11	.news-card.small을 float:left, 너비 30%로 가로 배치한다.	.news-card.small { float:left; width:30%; margin-right:5%; }
+12	#bottom-bar에 clear:both, 배경색 #1a237e, 텍스트 중앙 정렬을 적용한다.	#bottom-bar { clear:both; background:#1a237e; text-align:center; padding:18px; }

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algo Learner | AI 기반 알고리즘 개념 학습</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div style="text-align: left;">
+                    <h1>Algo Learner</h1>
+                    <p>다양한 시각적 학습 모드로 알고리즘의 심연을 탐험하세요.</p>
+                </div>
+                <a href="../index.html" class="secondary-btn" style="text-decoration: none; border-radius: 12px; padding: 0.6rem 1.25rem; font-size: 0.9rem;">
+                    🏠 메인 홈
+                </a>
+            </div>
+        </header>
+
+        <main>
+            <!-- Setup View (Teacher/Input) -->
+            <section id="setup-view" class="view active">
+                <div class="card">
+                    <h2>학습 환경 설정</h2>
+                    
+                    <div class="file-upload-group" id="drop-zone">
+                        <label for="file-upload" class="secondary-btn" style="cursor: pointer; padding: 1rem 2rem; border-radius: 14px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            주피터 노트북(.ipynb) 또는 코드 파일 드롭
+                        </label>
+                        <input type="file" id="file-upload" accept=".ipynb" style="display: none;">
+                        <div id="file-name-display" class="file-name"></div>
+                    </div>
+
+                    <div class="input-group">
+                        <textarea id="code-input" placeholder="이곳에 알고리즘 코드를 직접 입력하거나 파일을 업로드하세요..." spellcheck="false"></textarea>
+                    </div>
+                    
+                    <div class="mode-selection-group">
+                        <label style="display: block; font-weight: 600; margin-bottom: 1rem; color: var(--accent); font-family: 'Outfit', sans-serif; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">학습 모드</label>
+                        <div class="mode-selection-grid">
+                            <label class="mode-radio selected"><input type="radio" name="learning-mode" value="blank" checked> 🔲 빈칸 채우기</label>
+                            <label class="mode-radio"><input type="radio" name="learning-mode" value="parsons"> 🧩 블록 퍼즐</label>
+                            <label class="mode-radio"><input type="radio" name="learning-mode" value="bug"> 🐛 버그 찾기</label>
+                            <label class="mode-radio"><input type="radio" name="learning-mode" value="comment"> 🏷️ 주석 매칭</label>
+                            <label class="mode-radio"><input type="radio" name="learning-mode" value="qa"> ❓ 커스텀 질문</label>
+                        </div>
+                    </div>
+
+                    <div id="blank-settings" class="mode-settings active settings-group">
+                        <label for="difficulty-slider">
+                            추출 밀도: <span id="difficulty-value" style="color: var(--accent);">20</span>%
+                        </label>
+                        <input type="range" id="difficulty-slider" min="5" max="50" step="5" value="20">
+                    </div>
+
+                    <div id="qa-settings" class="mode-settings settings-group" style="flex-direction: column; gap: 1rem; align-items: stretch;">
+                        <input type="text" id="qa-question" class="text-input" placeholder="질문 내용을 입력하세요 (예: 루프 종료 후 i의 값은?)">
+                        <input type="text" id="qa-answer" class="text-input" placeholder="정답을 입력하세요">
+                    </div>
+                    
+                    <button id="generate-btn" class="primary-btn">학습 시작하기</button>
+                </div>
+            </section>
+
+            <!-- Practice View (Student/Learning) -->
+            <section id="practice-view" class="view">
+                <div class="card practice-card" id="capture-area">
+                    <div class="certificate-info">
+                        <h2 style="color: var(--success); margin-bottom: 0.5rem; font-family: 'Outfit', sans-serif;">CONGRATULATIONS</h2>
+                        <p style="color: var(--text-secondary);">이름: <span id="cert-name" style="color: #fff; font-weight: 600;"></span></p>
+                    </div>
+
+                    <div class="practice-header">
+                        <h2>학습 세션</h2>
+                        <button id="back-btn" class="icon-btn" title="다시 설정하기">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path d="m15 18-6-6 6-6"/></svg>
+                            환경 재설정
+                        </button>
+                    </div>
+                    
+                    <div id="comment-bank-container" style="display: none; margin-bottom: 2rem;">
+                        <p style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.95rem; font-weight: 500;">💡 주석을 코드의 올바른 위치로 드래그하세요.</p>
+                        <div id="comment-bank" class="comment-container"></div>
+                    </div>
+
+                    <div class="code-container" id="practice-container">
+                        <!-- Dynamic content -->
+                    </div>
+
+                    <div id="qa-display-container" style="display: none;" class="qa-display">
+                        <h3 id="qa-display-question"></h3>
+                        <input type="text" id="qa-student-answer" class="text-input" placeholder="이곳에 정답을 입력하세요">
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button id="check-btn" class="success-btn">정답 확인</button>
+                        <button id="reset-btn" class="secondary-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                            다시 섞기
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Result Modal -->
+    <div id="result-modal" class="modal-overlay">
+        <div class="modal-card">
+            <h2>🎉 Excellent!</h2>
+            <p style="color: var(--text-secondary); font-size: 1.1rem;">모든 로직을 완벽하게 이해하셨습니다.</p>
+            <div class="result-stats">
+                <div>정답률 <span class="highlight">100%</span></div>
+            </div>
+            
+            <div class="input-group" style="margin-top: 2rem; text-align: left;">
+                <label for="student-name" style="font-size: 0.9rem; color: var(--text-secondary); margin-left: 0.5rem;">학생 성명 / 학번</label>
+                <input type="text" id="student-name" placeholder="홍길동 (20240000)" class="text-input">
+            </div>
+
+            <div class="action-buttons" style="margin-top: 2.5rem;">
+                <button id="copy-result-btn" class="secondary-btn" style="flex: 1.2;">텍스트 복사</button>
+                <button id="download-img-btn" class="primary-btn">인증서 다운로드</button>
+            </div>
+            <button id="close-modal-btn" class="icon-btn close-modal" style="top: 2rem; right: 2rem;">&times;</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // UI Interaction for mode selection
+        document.querySelectorAll('.mode-radio').forEach(label => {
+            label.addEventListener('click', () => {
+                document.querySelectorAll('.mode-radio').forEach(l => l.classList.remove('selected'));
+                label.classList.add('selected');
+            });
+        });
+    </script>
+</body>
+</html>

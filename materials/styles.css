@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@500;700&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+    --bg-main: #f1f5f9;
+    --sidebar-bg: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --accent: #10b981;
+    --border-color: #e2e8f0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Navbar */
+.navbar {
+    height: 64px;
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    flex-shrink: 0;
+}
+
+.logo { 
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.3rem; font-weight: 700; color: var(--text-primary);
+}
+
+/* Sidebar */
+.sidebar {
+    width: 320px;
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--border-color);
+    display: flex; flex-direction: column;
+}
+
+.sidebar-header { padding: 1.5rem 2rem; border-bottom: 1px solid var(--border-color); }
+.sidebar-header h2 { font-family: 'Outfit', sans-serif; font-size: 1.1rem; }
+
+.material-item {
+    padding: 1.25rem 2rem; border-bottom: 1px solid var(--border-color);
+    cursor: pointer; transition: all 0.2s; position: relative;
+}
+.material-item:hover { background-color: #f8fafc; }
+.material-item.active { background-color: #f0fdf4; }
+.material-item.active::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--accent);
+}
+
+.item-week {
+    font-size: 0.7rem; color: var(--accent); font-weight: 700;
+    padding: 0.2rem 0.5rem; background: rgba(16, 185, 129, 0.1); border-radius: 4px;
+    margin-bottom: 0.4rem; display: inline-block;
+}
+
+.item-title { font-size: 0.95rem; font-weight: 500; color: var(--text-secondary); }
+.material-item.active .item-title { color: var(--text-primary); }
+
+/* Viewer Area */
+.viewer-area {
+    flex: 1; background-color: #cbd5e1; display: flex; align-items: center; justify-content: center;
+}
+
+.nav-btn {
+    background: #fff; border: 1px solid var(--border-color); color: var(--text-primary);
+    padding: 0.5rem 1rem; border-radius: 8px; font-weight: 600; cursor: pointer;
+    text-decoration: none; display: flex; align-items: center; gap: 0.5rem;
+}
+.nav-btn:hover { background: #f1f5f9; }

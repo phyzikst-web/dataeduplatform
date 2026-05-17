@@ -1,0 +1,14 @@
+구분	조건 설명	적용할 값
+1	전체 선택자(*)로 margin과 padding을 0으로 초기화하고, box-sizing을 border-box로 설정한다.	* { margin:0; padding:0; box-sizing:border-box; }
+2	body의 글꼴, 배경색, 글자색을 지정한다.	body { font-family:'Malgun Gothic', sans-serif; background:#f2f4f7; color:#222; }
+3	#container의 너비를 960px로 설정하고, margin:0 auto로 중앙 정렬한다.	#container { width:960px; margin:0 auto; }
+4	#header의 높이 130px, 배경색 #263238, 글자색 white로 설정한다.	#header { height:130px; background:#263238; color:white; padding:30px; }
+5	#gnb의 배경색을 #37474f로 설정하고, overflow:hidden을 적용한다.	#gnb { background:#37474f; overflow:hidden; }
+6	#gnb li를 float:left로 가로 배치하고, 패딩과 글자색을 지정한다.	#gnb li { list-style:none; float:left; padding:16px 30px; color:white; }
+7	#main에 배경색 white, overflow:hidden을 적용한다.	#main { background:white; overflow:hidden; }
+8	#lnb를 float:left, 너비 220px로 좌측에 배치한다.	#lnb { float:left; width:220px; min-height:380px; background:#eceff1; padding:24px; }
+9	#content를 float:right, 너비 740px로 우측에 배치한다.	#content { float:right; width:740px; min-height:380px; padding:30px; }
+10	.info-wrap에 overflow:hidden을 적용한다.	.info-wrap { overflow:hidden; }
+11	.left-box를 float:left, .right-box를 float:right로 좌우 배치한다.	.left-box { float:left; }
+12	.clear-text에 clear:both를 적용하여 float를 해제한다.	.clear-text { clear:both; padding-top:20px; }
+13	#footer에 clear:both, 배경색 #263238, 텍스트 중앙 정렬을 적용한다.	#footer { clear:both; background:#263238; color:#cfd8dc; text-align:center; padding:22px; }

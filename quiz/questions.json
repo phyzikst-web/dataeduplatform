@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "question": "다음 중 이미 정렬된 배열에서 특정 값을 찾을 때 가장 효율적인 탐색 알고리즘과 그 시간 복잡도로 알맞은 것은?",
+    "options": [
+      "선형 탐색 (Linear Search) - O(N)",
+      "이진 탐색 (Binary Search) - O(log N)",
+      "깊이 우선 탐색 (DFS) - O(V+E)",
+      "해시 탐색 (Hash Search) - O(N^2)"
+    ],
+    "answerIndex": 1,
+    "explanation": "이미 정렬된 데이터에서는 배열의 중간값을 비교하며 탐색 범위를 반으로 줄여나가는 이진 탐색(Binary Search)이 가장 효율적이며 시간 복잡도는 O(log N)입니다."
+  },
+  {
+    "id": 2,
+    "question": "웹 브라우저의 '뒤로 가기' 기능이나, 워드 프로세서의 '실행 취소(Undo)' 기능을 구현할 때 가장 적합한 자료구조는?",
+    "options": [
+      "큐 (Queue)",
+      "스택 (Stack)",
+      "트리 (Tree)",
+      "그래프 (Graph)"
+    ],
+    "answerIndex": 1,
+    "explanation": "가장 최근에 실행된 작업을 가장 먼저 취소해야 하므로 LIFO(후입선출) 구조인 스택(Stack)을 사용하는 것이 적합합니다."
+  },
+  {
+    "id": 3,
+    "question": "동적 계획법(Dynamic Programming)의 핵심 원리 중, 한 번 계산한 결과를 메모리에 저장해두고 동일한 계산이 필요할 때 재사용하여 실행 속도를 높이는 기법을 무엇이라고 하나요?",
+    "options": [
+      "분할 정복 (Divide and Conquer)",
+      "백트래킹 (Backtracking)",
+      "메모이제이션 (Memoization)",
+      "휴리스틱 (Heuristic)"
+    ],
+    "answerIndex": 2,
+    "explanation": "메모이제이션(Memoization)은 동일한 계산의 반복을 피하기 위해 이전 계산 결과를 캐싱(저장)해두는 동적 계획법의 핵심 기법입니다."
+  },
+  {
+    "id": 4,
+    "question": "다음 중 해시 테이블(Hash Table)에서 서로 다른 두 키(Key)가 같은 해시(Hash) 값을 가지게 되는 '충돌(Collision)' 문제를 해결하기 위한 방법이 아닌 것은?",
+    "options": [
+      "체이닝 (Chaining)",
+      "선형 탐사 (Linear Probing)",
+      "이중 해싱 (Double Hashing)",
+      "위상 정렬 (Topological Sort)"
+    ],
+    "answerIndex": 3,
+    "explanation": "위상 정렬은 방향 그래프에서 정점들을 순서대로 나열하는 알고리즘으로, 해시 충돌 해결 방법과는 전혀 무관합니다. 나머지 세 개는 모두 충돌 해결 기법입니다."
+  },
+  {
+    "id": 5,
+    "question": "최단 경로를 찾는 알고리즘 중, '음수 가중치'가 있는 간선이 포함된 그래프에서도 사용할 수 있는 알고리즘은?",
+    "options": [
+      "다익스트라 (Dijkstra) 알고리즘",
+      "벨만-포드 (Bellman-Ford) 알고리즘",
+      "크루스칼 (Kruskal) 알고리즘",
+      "프림 (Prim) 알고리즘"
+    ],
+    "answerIndex": 1,
+    "explanation": "다익스트라 알고리즘은 음수 가중치가 있을 때 정상 동작을 보장하지 않습니다. 음수 간선이 있을 때는 벨만-포드 알고리즘을 사용해야 합니다."
+  }
+]
