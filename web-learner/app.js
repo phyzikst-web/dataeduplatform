@@ -11,17 +11,18 @@ let savedCode = {};  // { idx: cssCode } — 학생 입력 보존
 
 // ─── 파일 로드 ───
 async function loadProblems() {
+    const t = Date.now();
     // 1. list.txt에서 문제 목록 읽기
-    const listText = await fetch('problems/list.txt').then(r => r.text());
+    const listText = await fetch(`problems/list.txt?t=${t}`).then(r => r.text());
     const titles = listText.trim().split('\n').filter(l => l.trim());
 
     // 2. 각 문제 폴더에서 파일 로드
     for (let i = 0; i < titles.length; i++) {
         const folder = `problems/${i + 1}`;
         const [html, css, condText] = await Promise.all([
-            fetch(`${folder}/code.html`).then(r => r.text()),
-            fetch(`${folder}/answer.css`).then(r => r.text()),
-            fetch(`${folder}/conditions.txt`).then(r => r.text())
+            fetch(`${folder}/code.html?t=${t}`).then(r => r.text()),
+            fetch(`${folder}/answer.css?t=${t}`).then(r => r.text()),
+            fetch(`${folder}/conditions.txt?t=${t}`).then(r => r.text())
         ]);
 
         problems.push({
