@@ -112,12 +112,11 @@ async function loadProblems() {
         // 정답 CSS 결정: answer.css가 있으면 사용, 없으면 HTML에서 추출한 CSS 사용
         const answerCss = cssFile.trim() || extractedCss;
 
-        // 조건표 파싱 후 검증
+        // 조건표 파싱
         let conditions = parseConditions(condText);
-        const isValid = validateConditions(conditions, htmlOnly);
 
-        // 조건이 HTML과 맞지 않으면 CSS에서 자동 생성
-        if (!isValid && answerCss) {
+        // conditions.txt가 비어있을 때만 자동 생성
+        if (conditions.length === 0 && answerCss) {
             conditions = autoGenerateConditions(answerCss);
         }
 
