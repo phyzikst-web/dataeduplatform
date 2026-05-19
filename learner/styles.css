@@ -155,3 +155,146 @@ button {
     border-radius: 12px; padding: 0.8rem 1rem; margin-top: 1rem;
 }
 .text-input:focus { outline: none; border-color: var(--accent); background: #fff; }
+
+/* Premium Dropdown Select Styling */
+.select-wrapper {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+
+select {
+    width: 100%;
+    background: #fff;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.9rem 2.5rem 0.9rem 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: all 0.2s;
+    outline: none;
+}
+
+select:hover {
+    border-color: var(--accent);
+    background: #f8fafc;
+}
+
+.select-wrapper::after {
+    content: '';
+    position: absolute;
+    right: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--text-secondary);
+    pointer-events: none;
+}
+
+/* Notebook View Styles */
+.code-container.notebook-view {
+    background: #ffffff;
+    color: var(--text-primary);
+    font-family: 'Inter', sans-serif;
+    padding: 2.5rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+.notebook-cell {
+    margin-bottom: 1.5rem;
+}
+.markdown-cell {
+    line-height: 1.7;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+.markdown-cell h1, .markdown-cell h2, .markdown-cell h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    font-family: 'Outfit', sans-serif;
+}
+.markdown-cell h1 { font-size: 2rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem; }
+.markdown-cell h2 { font-size: 1.5rem; color: var(--accent); }
+.markdown-cell table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 1rem;
+    background: #fff;
+}
+.markdown-cell th, .markdown-cell td {
+    border: 1px solid var(--border-color);
+    padding: 0.75rem;
+    text-align: left;
+}
+.markdown-cell th { background: #f8fafc; font-weight: 600; }
+.markdown-cell code {
+    background: #f1f5f9;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9em;
+    color: #ef4444;
+}
+.code-cell {
+    background: #0d1117;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.25rem;
+    overflow-x: auto;
+}
+.code-cell pre { margin: 0; }
+.code-cell code {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.95rem;
+    color: #c9d1d9;
+}
+.notebook-code-editor {
+    width: 100%;
+    min-height: 40px;
+    background: transparent;
+    border: none;
+    color: #c9d1d9;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.95rem;
+    resize: none;
+    outline: none;
+    overflow: hidden;
+    line-height: 1.5;
+}
+.notebook-code-editor.correct {
+    border: 2px solid var(--success);
+    border-radius: 4px;
+    background: rgba(16, 185, 129, 0.1);
+}
+.notebook-code-editor.incorrect {
+    border: 2px solid var(--error);
+    border-radius: 4px;
+    background: rgba(239, 68, 68, 0.1);
+}
+.notebook-blank-input {
+    background: #1e293b; 
+    border: 1px solid #334155; 
+    border-radius: 4px;
+    color: #38bdf8; 
+    font-family: 'Fira Code', monospace; 
+    padding: 0 4px; 
+    text-align: center;
+    margin: 0 4px;
+    outline: none;
+}
+.notebook-blank-input:focus { border-color: var(--accent); }
+.notebook-blank-input.correct { border-color: var(--success); color: #34d399; }
+.notebook-blank-input.incorrect { border-color: var(--error); color: #fb7185; animation: shake 0.4s; }
+.notebook-output {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px dashed #30363d;
+    color: #8b949e;
+    font-size: 0.9rem;
+    font-family: 'Fira Code', monospace;
+}

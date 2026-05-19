@@ -6,6 +6,10 @@
     <title>Algo Learner | AI 기반 알고리즘 개념 학습</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="notebooks.js" defer></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -38,6 +42,15 @@
                     </div>
 
                     <div class="input-group">
+                        <label for="notebook-select" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--accent); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">강의 실습 불러오기</label>
+                        <div class="select-wrapper">
+                            <select id="notebook-select">
+                                <option value="" disabled selected>실습 주피터 노트북을 선택해 주세요</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
                         <textarea id="code-input" placeholder="이곳에 알고리즘 코드를 직접 입력하거나 파일을 업로드하세요..." spellcheck="false"></textarea>
                     </div>
                     
@@ -48,6 +61,7 @@
                             <label class="mode-radio"><input type="radio" name="learning-mode" value="parsons"> 🧩 블록 퍼즐</label>
                             <label class="mode-radio"><input type="radio" name="learning-mode" value="bug"> 🐛 버그 찾기</label>
                             <label class="mode-radio"><input type="radio" name="learning-mode" value="comment"> 🏷️ 주석 매칭</label>
+                            <label class="mode-radio"><input type="radio" name="learning-mode" value="notebook"> 📓 노트북 학습 (이론+정답)</label>
                             <label class="mode-radio"><input type="radio" name="learning-mode" value="qa"> ❓ 커스텀 질문</label>
                         </div>
                     </div>

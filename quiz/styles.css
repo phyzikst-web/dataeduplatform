@@ -83,3 +83,60 @@ header { display: flex; justify-content: space-between; align-items: center; mar
     box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
 }
 .primary-btn:hover { background: var(--accent-hover); transform: translateY(-2px); }
+
+/* Select Styling */
+.select-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+select {
+    background: #fff;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.8rem 2.5rem 0.8rem 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: all 0.2s;
+    outline: none;
+}
+
+select:hover {
+    border-color: var(--accent);
+    background: #f8fafc;
+}
+
+.select-wrapper::after {
+    content: '';
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--text-secondary);
+    pointer-events: none;
+}
+
+/* Custom Quiz Code Snippet Styles */
+.quiz-code-block {
+    background: #0f172a;
+    color: #f8fafc;
+    padding: 1.25rem 1.5rem;
+    border-radius: 12px;
+    font-family: 'Fira Code', 'Consolas', monospace;
+    font-size: 0.9rem;
+    overflow-x: auto;
+    margin: 1.25rem 0;
+    border: 1px solid #1e293b;
+    line-height: 1.55;
+    text-align: left;
+}
+.quiz-text-line {
+    margin-bottom: 0.6rem;
+}
+

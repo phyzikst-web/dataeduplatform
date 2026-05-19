@@ -5,10 +5,70 @@ document.addEventListener('DOMContentLoaded', () => {
     const dropZone = document.getElementById('drop-zone');
     const fileUpload = document.getElementById('file-upload');
     const fileNameDisplay = document.getElementById('file-name-display');
+    const notebookSelect = document.getElementById('notebook-select');
     const generateBtn = document.getElementById('generate-btn');
     const backBtn = document.getElementById('back-btn');
     const checkBtn = document.getElementById('check-btn');
     const resetBtn = document.getElementById('reset-btn');
+    
+    // Load pre-hosted notebooks if available
+    if (typeof NOTEBOOKS !== 'undefined' && NOTEBOOKS.length > 0) {
+        notebookSelect.innerHTML = '';
+        
+        // Add placeholder option
+        const placeholderOpt = document.createElement('option');
+        placeholderOpt.value = "";
+        placeholderOpt.textContent = "실습 주피터 노트북을 선택해 주세요";
+        placeholderOpt.disabled = true;
+        placeholderOpt.selected = true;
+        notebookSelect.appendChild(placeholderOpt);
+
+        NOTEBOOKS.forEach(n => {
+            const option = document.createElement('option');
+            option.value = n.id;
+            option.textContent = n.title;
+            notebookSelect.appendChild(option);
+        });
+
+        notebookSelect.addEventListener('change', async (e) => {
+            const selectedId = e.target.value;
+            const notebookMeta = NOTEBOOKS.find(n => n.id === selectedId);
+            if (!notebookMeta) return;
+
+            fileNameDisplay.textContent = `불러오는 중...`;
+            
+            try {
+                const response = await fetch(notebookMeta.filepath);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                window.currentNotebook = await response.json();
+                window.answerNotebook = null;
+                if (notebookMeta.answerpath) {
+                    try {
+                        const ansRes = await fetch(notebookMeta.answerpath);
+                        if (ansRes.ok) window.answerNotebook = await ansRes.json();
+                    } catch (e) {
+                        console.warn("Answer notebook load failed", e);
+                    }
+                }
+                
+                let combined = '';
+                if (window.currentNotebook.cells) {
+                    window.currentNotebook.cells.forEach(cell => {
+                        if (cell.cell_type === 'code') {
+                            combined += (Array.isArray(cell.source) ? cell.source.join('') : cell.source) + '\n\n';
+                        }
+                    });
+                }
+                codeInput.value = combined.trim();
+                fileNameDisplay.textContent = `선택됨: ${notebookMeta.title}`;
+            } catch (err) {
+                console.error("Failed to load notebook:", err);
+                alert(`노트북 불러오기 실패! 파일 경로를 확인해 주세요: ${notebookMeta.filepath}`);
+                fileNameDisplay.textContent = '불러오기 실패';
+            }
+        });
+    }
     
     // Mode UI Elements
     const modeRadios = document.querySelectorAll('input[name="learning-mode"]');
@@ -85,10 +145,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const reader = new FileReader();
         reader.onload = (event) => {
             try {
-                const notebook = JSON.parse(event.target.result);
+                window.currentNotebook = JSON.parse(event.target.result);
                 let combined = '';
-                if (notebook.cells) {
-                    notebook.cells.forEach(cell => {
+                if (window.currentNotebook.cells) {
+                    window.currentNotebook.cells.forEach(cell => {
                         if (cell.cell_type === 'code') combined += (Array.isArray(cell.source) ? cell.source.join('') : cell.source) + '\n\n';
                     });
                 }
@@ -106,8 +166,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function generatePractice() {
         practiceContainer.innerHTML = '';
+        practiceContainer.classList.remove('notebook-view');
         commentBankContainer.style.display = 'none';
         qaDisplayContainer.style.display = 'none';
+        
+        const actionButtons = document.querySelector('#practice-view .action-buttons');
+        if (actionButtons) actionButtons.style.display = 'flex';
+        
         modeData = {};
 
         switch (currentMode) {
@@ -115,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'parsons': generateParsons(); break;
             case 'bug': generateBugHunter(); break;
             case 'comment': generateCommentMatch(); break;
+            case 'notebook': generateNotebookView(); break;
             case 'qa': generateQA(); break;
         }
     }
@@ -300,6 +366,126 @@ document.addEventListener('DOMContentLoaded', () => {
         practiceContainer.appendChild(pre);
     }
 
+    // 6. Notebook View Mode
+    function generateNotebookView() {
+        if (!window.currentNotebook || !window.currentNotebook.cells) {
+            practiceContainer.innerHTML = '<p style="color:var(--error);">노트북 데이터가 없습니다.</p>';
+            return;
+        }
+        
+        practiceContainer.classList.add('notebook-view');
+        
+        const probCodeCells = window.currentNotebook.cells.filter(c => c.cell_type === 'code');
+        const ansCodeCells = (window.answerNotebook && window.answerNotebook.cells) ? window.answerNotebook.cells.filter(c => c.cell_type === 'code') : [];
+        let codeCellIndex = 0;
+        
+        window.currentNotebook.cells.forEach(cell => {
+            const cellDiv = document.createElement('div');
+            cellDiv.className = 'notebook-cell';
+            
+            const sourceText = Array.isArray(cell.source) ? cell.source.join('') : cell.source;
+            
+            if (cell.cell_type === 'markdown') {
+                cellDiv.classList.add('markdown-cell');
+                cellDiv.innerHTML = marked.parse(sourceText);
+            } else if (cell.cell_type === 'code') {
+                cellDiv.classList.add('code-cell');
+                
+                let ansText = '';
+                if (codeCellIndex < ansCodeCells.length) {
+                    const aSrc = ansCodeCells[codeCellIndex].source;
+                    ansText = Array.isArray(aSrc) ? aSrc.join('') : aSrc;
+                }
+                
+                if (sourceText.includes('_____')) {
+                    const pre = document.createElement('pre');
+                    const code = document.createElement('code');
+                    code.className = 'language-python';
+                    
+                    const parts = sourceText.split('_____');
+                    let extractedAnswers = [];
+                    
+                    if (ansText) {
+                        let searchStartIndex = 0;
+                        for (let i = 0; i < parts.length - 1; i++) {
+                            const prefix = parts[i];
+                            const suffix = parts[i+1];
+                            const preIdx = ansText.indexOf(prefix, searchStartIndex);
+                            if (preIdx !== -1) {
+                                const startOfAns = preIdx + prefix.length;
+                                if (suffix.length === 0 && i === parts.length - 2) {
+                                    extractedAnswers.push(ansText.substring(startOfAns));
+                                    break;
+                                }
+                                const sufIdx = ansText.indexOf(suffix, startOfAns);
+                                if (sufIdx !== -1) {
+                                    extractedAnswers.push(ansText.substring(startOfAns, sufIdx));
+                                    searchStartIndex = sufIdx;
+                                } else extractedAnswers.push("");
+                            } else extractedAnswers.push("");
+                        }
+                    }
+                    
+                    parts.forEach((part, idx) => {
+                        code.appendChild(document.createTextNode(part));
+                        if (idx < parts.length - 1) {
+                            const input = document.createElement('input');
+                            input.type = 'text';
+                            input.className = 'notebook-blank-input';
+                            const ans = extractedAnswers[idx] || '';
+                            input.dataset.answer = ans.trim();
+                            const w = Math.max(4, ans.length + 2);
+                            input.style.width = `${w}ch`;
+                            input.addEventListener('input', function() {
+                                this.classList.remove('correct', 'incorrect');
+                            });
+                            code.appendChild(input);
+                        }
+                    });
+                    pre.appendChild(code);
+                    cellDiv.appendChild(pre);
+                } else {
+                    const textarea = document.createElement('textarea');
+                    textarea.className = 'notebook-code-editor';
+                    textarea.spellcheck = false;
+                    textarea.value = sourceText;
+                    textarea.dataset.index = codeCellIndex;
+                    
+                    textarea.style.height = 'auto';
+                    setTimeout(() => { textarea.style.height = (textarea.scrollHeight || 100) + 'px'; }, 10);
+                    textarea.addEventListener('input', function() {
+                        this.style.height = 'auto';
+                        this.style.height = (this.scrollHeight) + 'px';
+                        this.classList.remove('correct', 'incorrect');
+                    });
+                    
+                    cellDiv.appendChild(textarea);
+                }
+                
+                codeCellIndex++;
+                
+                if (cell.outputs && cell.outputs.length > 0) {
+                    const outputDiv = document.createElement('div');
+                    outputDiv.className = 'notebook-output';
+                    let outText = '';
+                    cell.outputs.forEach(out => {
+                        if (out.text) outText += Array.isArray(out.text) ? out.text.join('') : out.text;
+                    });
+                    if (outText) {
+                        const outPre = document.createElement('pre');
+                        outPre.textContent = outText;
+                        outputDiv.appendChild(outPre);
+                        cellDiv.appendChild(outputDiv);
+                    }
+                }
+            }
+            practiceContainer.appendChild(cellDiv);
+        });
+        
+        const actionButtons = document.querySelector('#practice-view .action-buttons');
+        if (actionButtons) actionButtons.style.display = 'flex';
+    }
+
     // Checking Logic
     function checkAnswers() {
         let allCorrect = true;
@@ -355,6 +541,54 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             checkedCount++;
         }
+        else if (currentMode === 'notebook') {
+            const blankInputs = document.querySelectorAll('.notebook-blank-input');
+            const editors = document.querySelectorAll('.notebook-code-editor');
+            
+            if (blankInputs.length === 0 && editors.length === 0) return;
+            
+            if (!window.answerNotebook || !window.answerNotebook.cells) {
+                return alert('정답 해설 노트북이 등록되지 않았습니다.');
+            }
+            
+            const answerCodeCells = window.answerNotebook.cells.filter(c => c.cell_type === 'code');
+            
+            blankInputs.forEach(input => {
+                input.classList.remove('correct', 'incorrect');
+                const studText = input.value.trim();
+                const expected = input.dataset.answer.replace(/\s+/g, '');
+                const actual = studText.replace(/\s+/g, '');
+                
+                if (actual === expected && actual !== '') {
+                    input.classList.add('correct');
+                } else {
+                    input.classList.add('incorrect');
+                    allCorrect = false;
+                }
+                checkedCount++;
+            });
+            
+            editors.forEach(editor => {
+                editor.classList.remove('correct', 'incorrect');
+                const editorIndex = parseInt(editor.dataset.index);
+                if (editorIndex < answerCodeCells.length) {
+                    const ansSource = answerCodeCells[editorIndex].source;
+                    const ansText = (Array.isArray(ansSource) ? ansSource.join('') : ansSource).trim();
+                    const studText = editor.value.trim();
+                    
+                    const cleanAns = ansText.replace(/\s+/g, '');
+                    const cleanStud = studText.replace(/\s+/g, '');
+                    
+                    if (cleanStud === cleanAns && cleanStud !== '') {
+                        editor.classList.add('correct');
+                    } else {
+                        editor.classList.add('incorrect');
+                        allCorrect = false;
+                    }
+                }
+                checkedCount++;
+            });
+        }
 
         if (checkedCount > 0 && allCorrect) {
             setTimeout(() => resultModal.classList.add('active'), 300);
@@ -366,7 +600,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     copyResultBtn.addEventListener('click', () => {
         const name = studentNameInput.value.trim() || '익명 학생';
-        const modesMap = { blank: '빈칸 채우기', parsons: '퍼즐 맟주기', bug: '버그 찾기', comment: '주석 짝맞추기', qa: '커스텀 QA' };
+        const modesMap = { blank: '빈칸 채우기', parsons: '퍼즐 맟주기', bug: '버그 찾기', comment: '주석 짝맞추기', qa: '커스텀 QA', notebook: '노트북 실습' };
         const textToCopy = `[학습 완료 인증]\n이름: ${name}\n학습 모드: ${modesMap[currentMode]}\n정답률: 100%`;
         navigator.clipboard.writeText(textToCopy).then(() => {
             const original = copyResultBtn.textContent;
