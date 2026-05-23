@@ -32,15 +32,6 @@
                 <div class="card">
                     <h2>학습 환경 설정</h2>
                     
-                    <div class="file-upload-group" id="drop-zone">
-                        <label for="file-upload" class="secondary-btn" style="cursor: pointer; padding: 1rem 2rem; border-radius: 14px;">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                            주피터 노트북(.ipynb) 또는 코드 파일 드롭
-                        </label>
-                        <input type="file" id="file-upload" accept=".ipynb" style="display: none;">
-                        <div id="file-name-display" class="file-name"></div>
-                    </div>
-
                     <div class="input-group">
                         <label for="notebook-select" style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--accent); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">강의 실습 불러오기</label>
                         <div class="select-wrapper">
@@ -50,32 +41,11 @@
                         </div>
                     </div>
 
-                    <div class="input-group">
-                        <textarea id="code-input" placeholder="이곳에 알고리즘 코드를 직접 입력하거나 파일을 업로드하세요..." spellcheck="false"></textarea>
-                    </div>
-                    
-                    <div class="mode-selection-group">
-                        <label style="display: block; font-weight: 600; margin-bottom: 1rem; color: var(--accent); font-family: 'Outfit', sans-serif; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em;">학습 모드</label>
-                        <div class="mode-selection-grid">
-                            <label class="mode-radio selected"><input type="radio" name="learning-mode" value="blank" checked> 🔲 빈칸 채우기</label>
-                            <label class="mode-radio"><input type="radio" name="learning-mode" value="parsons"> 🧩 블록 퍼즐</label>
-                            <label class="mode-radio"><input type="radio" name="learning-mode" value="bug"> 🐛 버그 찾기</label>
-                            <label class="mode-radio"><input type="radio" name="learning-mode" value="comment"> 🏷️ 주석 매칭</label>
-                            <label class="mode-radio"><input type="radio" name="learning-mode" value="notebook"> 📓 노트북 학습 (이론+정답)</label>
-                            <label class="mode-radio"><input type="radio" name="learning-mode" value="qa"> ❓ 커스텀 질문</label>
-                        </div>
-                    </div>
-
-                    <div id="blank-settings" class="mode-settings active settings-group">
+                    <div id="blank-settings" class="mode-settings active settings-group" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
                         <label for="difficulty-slider">
                             추출 밀도: <span id="difficulty-value" style="color: var(--accent);">20</span>%
                         </label>
                         <input type="range" id="difficulty-slider" min="5" max="50" step="5" value="20">
-                    </div>
-
-                    <div id="qa-settings" class="mode-settings settings-group" style="flex-direction: column; gap: 1rem; align-items: stretch;">
-                        <input type="text" id="qa-question" class="text-input" placeholder="질문 내용을 입력하세요 (예: 루프 종료 후 i의 값은?)">
-                        <input type="text" id="qa-answer" class="text-input" placeholder="정답을 입력하세요">
                     </div>
                     
                     <button id="generate-btn" class="primary-btn">학습 시작하기</button>
@@ -147,14 +117,5 @@
     </div>
 
     <script src="app.js"></script>
-    <script>
-        // UI Interaction for mode selection
-        document.querySelectorAll('.mode-radio').forEach(label => {
-            label.addEventListener('click', () => {
-                document.querySelectorAll('.mode-radio').forEach(l => l.classList.remove('selected'));
-                label.classList.add('selected');
-            });
-        });
-    </script>
 </body>
 </html>
