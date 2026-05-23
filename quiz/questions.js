@@ -6,7 +6,7 @@
  */
 
 const QUIZZES = [
-  { 
+{ 
     id: "quiz1", 
     title: "1주차: 자료구조 기초 (Array/List/Stack/Queue)", 
     filepath: "questions/week1.docx" 
@@ -15,5 +15,10 @@ const QUIZZES = [
     id: "quiz12",
     title: "12주차: 문자열 검색 알고리즘 (Brute Force / KMP / Boyer-Moore)",
     filepath: "questions/ch07_문자열검색_연습문제_정답해설.docx"
-  }
+  },
+  {
+    "id": "quiz_week13_tree",
+    "title": "13주차: 자료구조 트리(Tree) 기본 개념",
+    "filepath": "questions/week13_tree.docx"
+}
 ];

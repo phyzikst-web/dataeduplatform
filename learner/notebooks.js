@@ -6,10 +6,16 @@
  */
 
 const NOTEBOOKS = [
-  {
+{
     id: "string_search",
     title: "12주차: 문자열 검색 알고리즘 실습 (문제 풀이)",
     filepath: "notebooks/ch07_문자열검색_실습_문제.ipynb",
     answerpath: "notebooks/ch07_문자열검색_실습_정답해설.ipynb"
-  }
+  },
+  {
+    "id": "learner_week13_tree",
+    "title": "13주차: 트리 순회 및 구조체 개념 실습",
+    "filepath": "notebooks/week13_tree_실습.ipynb",
+    "answerpath": "notebooks/week13_tree_실습.ipynb"
+}
 ];

@@ -6,7 +6,7 @@
  */
 
 const PROBLEMS = [
-  { 
+{ 
     id: "q1", 
     title: "[Lv.1] 올바른 괄호 판별 (Stack)", 
     filepath: "problems/correct_parentheses.ipynb" 
@@ -35,5 +35,10 @@ const PROBLEMS = [
     id: "q6", 
     title: "[Lv.4] 보이어·무어 문자열 검색 (Boyer-Moore)", 
     filepath: "problems/bm_match.ipynb" 
-  }
+  },
+  {
+    "id": "judge_week13_tree",
+    "title": "[Lv.3] 트리의 최대 깊이 구하기 (DFS)",
+    "filepath": "problems/week13_tree_알고리즘.ipynb"
+}
 ];
