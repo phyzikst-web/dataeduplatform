@@ -10,5 +10,11 @@ const LECTURE_MATERIALS = [
     week: "12주차",
     title: "문자열 검색 알고리즘 강의 자료 (PPT 슬라이드)",
     filename: "ch07_문자열검색_강의자료.pdf"
+  },
+  {
+    id: 2,
+    week: "13주차",
+    title: "자료구조 트리(Tree) 기본 개념 강의 자료 (PDF 요약본)",
+    filename: "sample_lecture.pdf"
   }
 ];
