@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 알고리즘 튜터 | AI DataEdu Platform</title>
+    
+    <!-- Marked.js & Highlight.js for Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="chat-navbar">
+        <div class="nav-left">
+            <a href="../index.html" class="back-btn" title="알고리즘 홈으로">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            </a>
+            <div class="nav-title">
+                <h1>🧠 AI 알고리즘 튜터</h1>
+                <p>자료구조와 알고리즘에 대해 무엇이든 물어보세요</p>
+            </div>
+        </div>
+        <div class="nav-right">
+            <button id="api-key-btn" class="icon-btn" title="API 키 설정">🔑</button>
+            <button id="clear-chat-btn" class="icon-btn" title="대화 지우기">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            </button>
+            <a href="../../index.html" class="home-btn" title="메인 홈으로">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Chat Area -->
+    <main class="chat-container">
+        <div id="chat-messages" class="chat-messages">
+            <!-- Welcome Message -->
+            <div class="message-row ai">
+                <div class="avatar">🧠</div>
+                <div class="message-bubble">
+                    <div class="message-content">
+                        <p>안녕하세요! 👋</p>
+                        <p>자료구조와 알고리즘에 대해 궁금한 것이 있으면 편하게 물어보세요. 코드 예시와 함께 이해하기 쉽게 설명해 드리겠습니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Input Area -->
+    <div class="chat-input-wrapper">
+        <div class="chat-input-inner">
+            <textarea id="chat-input" placeholder="알고리즘에 대해 질문하세요... (Enter로 전송, Shift+Enter로 줄바꿈)" rows="1"></textarea>
+            <button id="send-btn" class="send-btn" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+        </div>
+        <div class="input-hint">팁: 코드를 붙여넣고 설명해달라고 요청할 수도 있습니다.</div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../../shared/gemini.js"></script>
+    <script src="../../shared/learning-tracker.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
