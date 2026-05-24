@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 문제 자동 생성기 | AI DataEdu Platform</title>
+    
+    <!-- CodeMirror for coding tests / fill-in-blanks -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/mode/javascript/javascript.min.js"></script>
+    
+    <!-- Marked & Highlight.js for markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="generator-body">
+    <!-- Navbar -->
+    <nav class="gen-navbar">
+        <div class="nav-left">
+            <a href="../index.html" class="back-btn" title="알고리즘 홈으로">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+            </a>
+            <div class="nav-title">
+                <h1>✨ AI 실전 문제 생성기</h1>
+            </div>
+        </div>
+        <div class="nav-right">
+            <button id="api-key-btn" class="icon-btn" title="API 키 설정">🔑</button>
+            <a href="../../index.html" class="home-btn" title="메인 홈으로">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </a>
+        </div>
+    </nav>
+
+    <div class="generator-container">
+        <!-- Step 1: Input Materials -->
+        <section id="step-1" class="step-section active">
+            <div class="section-header">
+                <h2>1. 학습 자료 입력</h2>
+                <p>문제를 만들고 싶은 강의 자료 텍스트, 코드, 또는 핵심 키워드를 입력하세요.</p>
+            </div>
+            
+            <textarea id="material-input" placeholder="예: 파이썬의 리스트(List)와 튜플(Tuple)의 차이점에 대해 문제를 만들어줘... 또는 강의 자료 내용 복사/붙여넣기"></textarea>
+            
+            <div class="generate-actions">
+                <button class="gen-btn" data-type="multiple-choice">
+                    <span class="icon">📝</span> 객관식 퀴즈
+                </button>
+                <button class="gen-btn" data-type="fill-blank">
+                    <span class="icon">🧩</span> 코드 빈칸 채우기
+                </button>
+                <button class="gen-btn" data-type="coding-test">
+                    <span class="icon">💻</span> 코딩테스트
+                </button>
+            </div>
+        </section>
+
+        <!-- Loading State -->
+        <section id="loading-state" class="step-section" style="display: none;">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <h3 id="loading-text">AI가 문제를 생성하고 있습니다...</h3>
+                <p>잠시만 기다려주세요 (최대 10~15초 소요)</p>
+            </div>
+        </section>
+
+        <!-- Step 2: Solve Question -->
+        <section id="step-2" class="step-section" style="display: none;">
+            <div class="section-header flex-between">
+                <div>
+                    <h2 id="q-title">생성된 문제</h2>
+                    <span class="badge" id="q-type-badge">유형</span>
+                </div>
+                <button id="reset-btn" class="outline-btn text-sm">새 문제 만들기</button>
+            </div>
+
+            <!-- Dynamic Question Content will be injected here -->
+            <div id="question-render-area" class="question-area">
+                <!-- Template for Multiple Choice -->
+                <!-- Template for Fill in Blank -->
+                <!-- Template for Coding Test -->
+            </div>
+
+            <div class="submit-action">
+                <button id="submit-answer-btn" class="primary-btn">제출 및 채점하기</button>
+            </div>
+
+            <!-- Grading Result & Explanation (Hidden initially) -->
+            <div id="result-area" class="result-area" style="display: none;">
+                <div class="result-header" id="result-header">
+                    <h3 id="result-status">정답입니다!</h3>
+                </div>
+                <div class="explanation-box markdown-body" id="explanation-content">
+                    <!-- Markdown Explanation -->
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../../shared/gemini.js"></script>
+    <script src="../../shared/learning-tracker.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
