@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LectureForge - 객관식 문제 생성</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .quiz-preview {
+            background: #fff;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .quiz-question {
+            font-weight: 600;
+            font-size: 1.05rem;
+            margin-bottom: 1rem;
+            color: #111827;
+        }
+        .quiz-options {
+            list-style-type: none;
+            padding: 0;
+            margin: 0 0 1rem 0;
+        }
+        .quiz-options li {
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            background: #F9FAFB;
+            border: 1px solid #F3F4F6;
+            border-radius: 6px;
+            color: #374151;
+        }
+        .quiz-answer {
+            font-size: 0.9rem;
+            color: #059669;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        .quiz-explanation {
+            font-size: 0.9rem;
+            color: #6B7280;
+        }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="logo">
+            <span class="icon">✨</span>
+            <h1>LectureForge</h1>
+            <nav class="header-nav" style="margin-left: 2rem; display: flex; gap: 1rem; align-items: center;">
+                <a href="../index.html" class="nav-link" style="text-decoration: none; color: #6B7280; font-size: 0.95rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;">강의 슬라이드 생성</a>
+                <a href="../notebook/index.html" class="nav-link" style="text-decoration: none; color: #6B7280; font-size: 0.95rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;">실습 Notebook 생성</a>
+                <a href="index.html" class="nav-link active" style="text-decoration: none; font-weight: 600; color: #4F46E5; background: #EEF2FF; padding: 0.5rem 1rem; border-radius: 8px;">객관식 문제 생성</a>
+                <a href="../codingtest/index.html" class="nav-link" style="text-decoration: none; color: #6B7280; font-size: 0.95rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;">코딩테스트 생성</a>
+            </nav>
+        </div>
+        <div class="actions">
+            <button id="btnSettings" class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                설정
+            </button>
+        </div>
+    </header>
+
+    <main class="app-main">
+        <div class="workspace">
+            <!-- Left: Settings Form -->
+            <div class="panel settings-panel">
+                <div class="panel-header">
+                    <h2>📝 객관식 문제 출제</h2>
+                </div>
+                <div class="panel-content">
+                    <form id="quizForm">
+                        <div class="form-group">
+                            <label for="subject">과목명/주제 *</label>
+                            <input type="text" id="subject" placeholder="예: 컴퓨터 구조" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="problemCount">출제 문항 수 *</label>
+                            <input type="number" id="problemCount" value="20" min="1" max="50" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pptFile">PPT 파일 업로드 (.pptx) *</label>
+                            <input type="file" id="pptFile" accept=".pptx" required style="padding: 0.5rem; background: #fff; border: 1px solid #E5E7EB; border-radius: 6px; width: 100%; box-sizing: border-box;">
+                            <small style="color: #6B7280; display: block; margin-top: 4px;">강의용 PPT 파일을 업로드하면 텍스트를 자동 분석하여 4지선다 문제를 출제합니다.</small>
+                        </div>
+                        
+                        <button type="submit" id="btnGenerate" class="btn btn-primary btn-block">
+                            ✨ 객관식 문제 자동 출제 (Gemini)
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right: Preview & Export -->
+            <div class="panel preview-panel">
+                <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2>미리보기</h2>
+                    <button id="btnExportWord" class="btn btn-secondary" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Word 파일 다운로드 (.docx)
+                    </button>
+                </div>
+                
+                <div class="panel-content preview-content" style="background: #F9FAFB;">
+                    <div id="quizPreviewRender" style="padding-bottom: 2rem;">
+                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #9CA3AF; text-align: center;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem; opacity: 0.5;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            <p>좌측에서 과목과 문항수를 설정하고 PPT를 업로드하면<br>여기에 4지선다형 문제가 렌더링됩니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="spinner"></div>
+        <p>PPT 텍스트 분석 중...</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/libs/jszip.min.js"></script>
+    <!-- Use standard docx.js -->
+    <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

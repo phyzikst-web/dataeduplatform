@@ -32,8 +32,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    let codingProblems = [];
     let currentProblem = null;
     let pyodide = null;
+    let currentWeek = '1';
+    let passedProblemsCount = 0;
+
+    // Retrieve week parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    currentWeek = urlParams.get('week') || '1';
 
     // 4. Update Run Button Enablement State
     function updateRunButtonState() {
@@ -56,130 +63,90 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error(err);
     }
 
-    // 6. Load Problems list from problems.js
-    if (typeof PROBLEMS !== 'undefined' && PROBLEMS.length > 0) {
-        problemSelect.innerHTML = '';
-        PROBLEMS.forEach(p => {
-            const option = document.createElement('option');
-            option.value = p.id;
-            option.textContent = p.title;
-            problemSelect.appendChild(option);
-        });
+    // 6. Load problems from Week JSON
+    await loadProblems(currentWeek);
 
-        loadProblem(PROBLEMS[0].id);
-    } else {
-        probTitle.textContent = "문제 목록 없음";
-        probDesc.innerHTML = `<p style="color:var(--error);">problems.js 파일을 로드하지 못했거나 문제 목록이 비어 있습니다.</p>`;
-    }
-
-    async function loadProblem(id) {
-        const problemMeta = PROBLEMS.find(p => p.id === id);
-        if (!problemMeta) return;
-
-        probTitle.textContent = problemMeta.title;
-        probDesc.innerHTML = `<div class="term-line term-info">주피터 노트북 파일(${problemMeta.filepath})을 로드 및 해석하는 중...</div>`;
-        
+    async function loadProblems(week) {
         try {
-            // Fetch the hosted .ipynb file
-            const response = await fetch(problemMeta.filepath);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            
-            const notebook = await response.json();
-            
-            let description = '';
-            let initialCode = '';
-            let testCases = [];
-            let functionName = 'solution'; // Default fallback
-
-            // Parse Notebook cells
-            if (notebook.cells) {
-                notebook.cells.forEach(cell => {
-                    if (cell.cell_type === 'markdown') {
-                        // Combine Markdown source lines
-                        const mdSource = Array.isArray(cell.source) ? cell.source.join('') : cell.source;
-                        description += mdSource + '\n';
-                    } else if (cell.cell_type === 'code') {
-                        const codeSource = Array.isArray(cell.source) ? cell.source.join('') : cell.source;
-                        
-                        // Check if it's the solution code template (contains 'def solution')
-                        if (codeSource.includes('def ')) {
-                            initialCode = codeSource;
-                            
-                            // Try to dynamically extract function name (e.g. def solution(number, k) -> "solution")
-                            const funcMatch = codeSource.match(/def\s+(\w+)\s*\(/);
-                            if (funcMatch) {
-                                functionName = funcMatch[1];
-                            }
-                        }
-                        
-                        // Check if it contains assertions for test cases
-                        if (codeSource.includes('assert ')) {
-                            const lines = codeSource.split('\n');
-                            lines.forEach(line => {
-                                // Matches "assert [anyFuncName]([args]) == [expected]"
-                                const assertRegex = /assert\s+\w+\((.*)\)\s*==\s*(.*)/;
-                                const match = line.trim().match(assertRegex);
-                                if (match) {
-                                    try {
-                                        const inputRaw = match[1];
-                                        const outputRaw = match[2];
-                                        
-                                        // Safely evaluate standard inputs and outputs
-                                        const evalInput = new Function(`return [${inputRaw}];`)();
-                                        const evalOutput = new Function(`return ${outputRaw};`)();
-                                        
-                                        testCases.push({
-                                            input: evalInput,
-                                            output: evalOutput
-                                        });
-                                    } catch (e) {
-                                        console.error("Failed to parse assertion line:", line, e);
-                                    }
-                                }
-                            });
-                        }
-                    }
-                });
+            let data;
+            if (week === 'local') {
+                const raw = sessionStorage.getItem('local_week_data');
+                if (!raw) throw new Error("로컬 세션 데이터를 찾을 수 없습니다.");
+                data = JSON.parse(raw);
+            } else {
+                const response = await fetch(`../data/week${week}.json?v=${new Date().getTime()}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                data = await response.json();
             }
 
-            // Update current problem with parsed data
-            currentProblem = {
-                id: problemMeta.id,
-                title: problemMeta.title,
-                description: description || '<h3>설명이 없는 문제</h3>',
-                initialCode: initialCode || 'def solution():\n    return',
-                testCases: testCases.length > 0 ? testCases : [{ input: [], output: null }],
-                functionName: functionName
-            };
+            codingProblems = data.coding_test;
+            if (!codingProblems || codingProblems.length === 0) {
+                throw new Error("코딩 테스트 문제가 포함되어 있지 않습니다.");
+            }
 
-            probDesc.innerHTML = currentProblem.description;
-            editor.setValue(currentProblem.initialCode);
-            
-            // Highlight first file tab
-            editorFilename.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="file-icon" style="color: #38bdf8;"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
-                solution.py
-            `;
-            
-            // Synced select dropdown UI
-            problemSelect.value = id;
-            updateRunButtonState();
-            
+            problemSelect.innerHTML = '';
+            codingProblems.forEach((p, idx) => {
+                const option = document.createElement('option');
+                option.value = idx;
+                option.textContent = p.title;
+                problemSelect.appendChild(option);
+            });
+
+            selectProblem(0);
             terminalOutput.innerHTML = '<div class="term-line">문제가 성공적으로 로드되었습니다. 파이썬 코드를 작성해 보세요.</div>';
 
         } catch (err) {
-            console.error("Failed to load notebook:", err);
+            console.error("Failed to load coding tests:", err);
+            probTitle.textContent = "문제 로드 실패";
             probDesc.innerHTML = `
-                <h3 style="color:var(--error); margin-bottom:10px;">주피터 노트북 파일 로드 실패</h3>
-                <p style="color:var(--text-secondary);">경로: <code>${problemMeta.filepath}</code></p>
+                <h3 style="color:var(--error); margin-bottom:10px;">코딩 테스트 데이터 로드 실패</h3>
+                <p style="color:var(--text-secondary);">사유: <code>${err.message}</code></p>
                 <hr style="border-color:#2e3d4f; margin:15px 0;">
-                <p><strong>원인 가능성:</strong></p>
-                <ol style="margin-left: 20px; line-height: 1.6; color: var(--text-secondary);">
-                    <li>해당 경로에 실제 노트북 파일이 존재하지 않는 경우</li>
-                    <li>웹서버(python -m http.server 8080 등)가 실행 중이지 않고 단순 더블클릭(file://)하여 로컬 파일을 차단당한 경우 (브라우저 CORS 제한)</li>
-                </ol>
+                <a href="../index.html" class="primary-btn" style="text-decoration:none; padding: 0.5rem 2.5rem; border-radius:10px; display:inline-block;">메인으로 이동</a>
             `;
         }
+    }
+
+    function selectProblem(index) {
+        const prob = codingProblems[index];
+        if (!prob) return;
+
+        probTitle.textContent = prob.title;
+        
+        let descHtml = `<h3><strong>${prob.title}</strong></h3><br>`;
+        descHtml += `<p style="line-height:1.75; color:#cbd5e1; white-space:pre-line;">${prob.description}</p><br>`;
+        descHtml += `<div style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); border-radius:12px; padding: 1.25rem; margin-top: 1rem;">`;
+        descHtml += `<p style="margin-bottom:0.5rem;"><strong>입력 예시:</strong> <code>${prob.example_input}</code></p>`;
+        descHtml += `<p style="margin:0;"><strong>출력 예시:</strong> <code>${prob.example_output}</code></p>`;
+        descHtml += `</div>`;
+
+        probDesc.innerHTML = descHtml;
+
+        // Custom starting template based on parameters
+        const templateCode = `# 아래 solution 함수의 매개변수를 문제 조건에 맞게 선언하여 구현하세요.
+# 예: 입력이 2개인 경우 -> def solution(nums, target):
+# 예: 입력이 1개인 경우 -> def solution(nums):
+def solution(*args):
+    # 여기에 코드를 작성하세요.
+    return
+`;
+
+        currentProblem = {
+            id: `coding_week_${currentWeek}_q_${index}`,
+            title: prob.title,
+            initialCode: templateCode,
+            testCases: prob.test_cases
+        };
+
+        editor.setValue(currentProblem.initialCode);
+        
+        editorFilename.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="file-icon" style="color: #38bdf8;"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+            solution.py
+        `;
+
+        problemSelect.value = index;
+        updateRunButtonState();
     }
 
     function setInitialCode() {
@@ -189,14 +156,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Event Handlers
-    problemSelect.addEventListener('change', (e) => loadProblem(e.target.value));
+    problemSelect.addEventListener('change', (e) => selectProblem(parseInt(e.target.value)));
     
     themeSelect.addEventListener('change', (e) => {
         editor.setOption('theme', e.target.value);
     });
 
     resetBtn.addEventListener('click', () => {
-        if (confirm("정말로 코드를 초기 상태로 되돌리시겠습니까?")) {
+        if (confirm("정말로 코드를 초기 템플릿 상태로 되돌리시겠습니까?")) {
             setInitialCode();
         }
     });
@@ -220,56 +187,83 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!currentProblem) return;
         const code = editor.getValue();
         const testCases = currentProblem.testCases;
-        const funcName = currentProblem.functionName;
 
-        terminalOutput.innerHTML = '<div class="term-line term-info">파이썬 채점을 시작합니다...</div>';
+        terminalOutput.innerHTML = '<div class="term-line term-info">파이썬 채점 런타임 가동 중...</div>';
         
         let allPassed = true;
         let passCount = 0;
 
+        // Clean & extract exact function name to invoke
+        const funcMatch = code.match(/def\s+(\w+)\s*\(/);
+        const funcName = funcMatch ? funcMatch[1] : 'solution';
+
         for (let i = 0; i < testCases.length; i++) {
             const tc = testCases[i];
-            const inputStr = JSON.stringify(tc.input);
-            const expectedStr = JSON.stringify(tc.output);
+            const inputStr = tc.input;
+            const expectedStr = tc.output.trim();
             
             try {
-                if (!pyodide) throw new Error("Pyodide가 아직 로드되지 않았습니다.");
+                if (!pyodide) throw new Error("Pyodide 파이썬 인터프리터가 아직 가동되지 않았습니다.");
                 
+                // Construct safe sandboxed execution script
+                // We parse inputStr which is a double-array encoded string e.g. "[[2, 7, 11, 15], 9]"
                 const pyCode = `
 import json
 ${code}
 __input = json.loads('${inputStr}')
-${funcName}(*__input)
+__res = ${funcName}(*__input)
+json.dumps(__res)
 `;
-                let userOutput = await pyodide.runPythonAsync(pyCode);
+                let userOutputJson = await pyodide.runPythonAsync(pyCode);
                 
-                // Convert Pyodide proxy to JS object
-                if (userOutput && typeof userOutput.toJs === 'function') {
-                    userOutput = userOutput.toJs();
-                }
-
-                // Check answer
-                const userOutputStr = JSON.stringify(userOutput);
-                if (userOutputStr === expectedStr) {
-                    appendTerminal(`테스트 ${i + 1} 〉 <span class="term-success">통과 (입력: ${inputStr}, 기댓값: ${expectedStr}, 실행결과: ${userOutputStr})</span>`);
-                    passCount++;
-                } else {
-                    appendTerminal(`테스트 ${i + 1} 〉 <span class="term-error">실패 (입력: ${inputStr}, 기댓값: ${expectedStr}, 실행결과: ${userOutputStr})</span>`);
-                    allPassed = false;
+                // Compare values
+                const userOutputClean = userOutputJson ? userOutputJson.trim() : 'null';
+                
+                // Standardize expected string in case of single/double quotes differences
+                let expectedClean = expectedStr;
+                try {
+                    // Try to parse both to JSON objects to compare structurally to prevent formatting fail
+                    const userObj = JSON.parse(userOutputClean);
+                    const expectedObj = JSON.parse(expectedStr);
+                    
+                    if (JSON.stringify(userObj) === JSON.stringify(expectedObj)) {
+                        appendTerminal(`테스트 ${i + 1} 〉 <span class="term-success">통과 (입력: ${inputStr}, 기댓값: ${expectedStr}, 실행결과: ${userOutputClean})</span>`);
+                        passCount++;
+                    } else {
+                        appendTerminal(`테스트 ${i + 1} 〉 <span class="term-error">실패 (입력: ${inputStr}, 기댓값: ${expectedStr}, 실행결과: ${userOutputClean})</span>`);
+                        allPassed = false;
+                    }
+                } catch (jsonErr) {
+                    // Fallback to basic string compare
+                    if (userOutputClean === expectedClean) {
+                        appendTerminal(`테스트 ${i + 1} 〉 <span class="term-success">통과 (입력: ${inputStr}, 기댓값: ${expectedStr})</span>`);
+                        passCount++;
+                    } else {
+                        appendTerminal(`테스트 ${i + 1} 〉 <span class="term-error">실패 (입력: ${inputStr}, 기댓값: ${expectedStr}, 실행결과: ${userOutputClean})</span>`);
+                        allPassed = false;
+                    }
                 }
 
             } catch (err) {
                 appendTerminal(`테스트 ${i + 1} 〉 <span class="term-error">런타임 에러: ${err.message}</span>`);
                 allPassed = false;
-                break; // Stop execution on error
+                break; // Stop running further tests on exception
             }
         }
 
-        appendTerminal('<hr style="border-color:#2e3d4f; margin:10px 0;">');
+        appendTerminal('<hr style="border-color:rgba(255,255,255,0.08); margin:10px 0;">');
         if (allPassed) {
             appendTerminal(`<span class="term-success" style="font-weight:600;">🎉 모든 테스트 케이스를 통과했습니다! (${passCount}/${testCases.length})</span>`);
+            
+            // Record coding submit success to local learning tracker
+            LearningTracker.recordCodingSubmit({
+                problemId: currentProblem.id,
+                passed: passCount,
+                total: testCases.length
+            });
+            
         } else {
-            appendTerminal(`<span class="term-error" style="font-weight:600;">❌ 제출한 코드가 일부 테스트 케이스를 통과하지 못했습니다.</span>`);
+            appendTerminal(`<span class="term-error" style="font-weight:600;">❌ 제출한 코드가 일부 테스트케이스를 통과하지 못했습니다. (${passCount}/${testCases.length})</span>`);
         }
     });
 

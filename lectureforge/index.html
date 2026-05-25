@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LectureForge - AI 강의자료 자동 생성 플랫폼</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- highlight.js theme -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="app-header">
+        <div class="logo">
+            <span class="icon">✨</span>
+            <h1>LectureForge</h1>
+            <nav class="header-nav" style="margin-left: 2rem; display: flex; gap: 1rem; align-items: center;">
+                <a href="index.html" class="nav-link active" style="text-decoration: none; font-weight: 600; color: #4F46E5; background: #EEF2FF; padding: 0.5rem 1rem; border-radius: 8px;">강의 슬라이드 생성</a>
+                <a href="notebook/index.html" class="nav-link" style="text-decoration: none; color: #6B7280; font-size: 0.95rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;">실습 Notebook 생성</a>
+                <a href="quiz/index.html" class="nav-link" style="text-decoration: none; color: #6B7280; font-size: 0.95rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;">객관식 문제 생성</a>
+                <a href="codingtest/index.html" class="nav-link" style="text-decoration: none; color: #6B7280; font-size: 0.95rem; padding: 0.5rem 1rem; border-radius: 8px; transition: all 0.2s;">코딩테스트 생성</a>
+            </nav>
+        </div>
+        <div class="actions">
+            <button id="btnSettings" class="btn btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                설정
+            </button>
+        </div>
+    </header>
+
+    <main class="app-container">
+        <!-- Sidebar: Form -->
+        <aside class="sidebar">
+            <section class="form-section">
+                <h2>강의 정보 입력</h2>
+                <form id="lectureForm">
+                    <div class="form-group">
+                        <label for="courseName">과목명 *</label>
+                        <input type="text" id="courseName" placeholder="예: 자료구조" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="topic">주제 *</label>
+                        <input type="text" id="topic" placeholder="예: 스택과 큐" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="week">주차</label>
+                        <input type="text" id="week" placeholder="예: 5주차">
+                    </div>
+                    <div class="form-group">
+                        <label for="targetAudience">대상 학습자</label>
+                        <select id="targetAudience">
+                            <option value="전문대 1학년">전문대 1학년</option>
+                            <option value="전문대 2학년">전문대 2학년</option>
+                            <option value="비전공자">비전공자</option>
+                            <option value="기타">기타</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="learningObjectives">학습 목표 (선택)</label>
+                        <textarea id="learningObjectives" placeholder="비워두면 AI가 자동 작성합니다" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="slideCount">분량 (슬라이드 수)</label>
+                        <select id="slideCount">
+                            <option value="10">10장 내외</option>
+                            <option value="15" selected>15장 내외</option>
+                            <option value="20">20장 내외</option>
+                            <option value="30">30장 내외</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>포함 요소</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" id="incConcept" checked> 개념 설명</label>
+                            <label><input type="checkbox" id="incCode" checked> 코드 예제</label>
+                            <label><input type="checkbox" id="incVisual" checked> 시각화 다이어그램</label>
+                            <label><input type="checkbox" id="incActivity"> 실습 활동</label>
+                            <label><input type="checkbox" id="incSummary" checked> 핵심 요약</label>
+                        </div>
+                    </div>
+                    <div class="form-group code-lang-group">
+                        <label for="codeLang">코드 언어 (코드 예제 선택 시)</label>
+                        <select id="codeLang">
+                            <option value="Python">Python</option>
+                            <option value="JavaScript">JavaScript</option>
+                            <option value="Java">Java</option>
+                            <option value="C++">C++</option>
+                            <option value="C">C</option>
+                            <option value="언어무관">언어 무관</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="extraInstructions">추가 요청사항 (선택)</label>
+                        <textarea id="extraInstructions" placeholder="예: 쉬운 비유를 많이 사용해주세요." rows="2"></textarea>
+                    </div>
+                    
+                    <button type="submit" id="btnGenerate" class="btn btn-primary btn-block">
+                        <span class="btn-text">✨ 강의자료 생성 (Gemini)</span>
+                        <span class="spinner hidden"></span>
+                    </button>
+                </form>
+            </section>
+        </aside>
+
+        <!-- Main Area: Preview & Edit -->
+        <section class="preview-area">
+            <div class="preview-header">
+                <div class="tabs">
+                    <button class="tab active" data-target="slide-view">슬라이드 미리보기</button>
+                    <button class="tab" data-target="raw-view">마크다운 원문</button>
+                </div>
+                <div class="export-actions">
+                    <button id="btnExportHtml" class="btn btn-secondary btn-sm" disabled>HTML 다운로드</button>
+                    <button id="btnExportMd" class="btn btn-secondary btn-sm" disabled>Markdown 다운로드</button>
+                    <button id="btnExportPpt" class="btn btn-primary btn-sm" disabled>PPT 다운로드</button>
+                </div>
+            </div>
+
+            <!-- Slide View Container -->
+            <div id="slide-view" class="view-container active">
+                <div class="slide-layout">
+                    <!-- Thumbnails -->
+                    <div class="thumbnails" id="thumbnailsList">
+                        <div class="empty-state">
+                            <p>좌측 패널에서 정보를 입력하고<br>강의자료를 생성해주세요.</p>
+                        </div>
+                    </div>
+                    <!-- Editor/Preview -->
+                    <div class="slide-editor">
+                        <div class="editor-toolbar">
+                            <span id="currentSlideLabel">슬라이드 1 / 1</span>
+                            <div class="toolbar-actions">
+                                <button class="btn btn-text btn-sm" id="btnRegenerateSlide">이 슬라이드 다시 생성</button>
+                                <button class="btn btn-text btn-sm" id="btnAddSlide">새 슬라이드 삽입</button>
+                                <button class="btn btn-text btn-sm text-danger" id="btnDeleteSlide">삭제</button>
+                            </div>
+                        </div>
+                        <div class="slide-content-wrapper">
+                            <textarea id="slideMarkdownEditor" class="markdown-editor" spellcheck="false" placeholder="마크다운 형식으로 슬라이드 내용을 입력하세요..."></textarea>
+                            <div id="slidePreviewRender" class="slide-preview-render markdown-body"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Raw Markdown View Container -->
+            <div id="raw-view" class="view-container">
+                <textarea id="rawMarkdown" class="raw-editor" spellcheck="false" placeholder="여기에 전체 마크다운이 표시됩니다. 직접 수정도 가능합니다."></textarea>
+            </div>
+            
+            <div id="loadingOverlay" class="loading-overlay hidden">
+                <div class="loading-content">
+                    <div class="spinner-large"></div>
+                    <p id="loadingMessage">AI가 강의자료를 작성 중입니다... (약 1~3분 소요)</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>설정</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="apiKey">Gemini API 키</label>
+                    <input type="password" id="apiKey" placeholder="AIzaSy...">
+                    <small class="help-text">브라우저 로컬 스토리지에만 안전하게 저장됩니다.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="btnSaveSettings">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- PptxGenJS -->
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/libs/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.min.js"></script>
+    
+    <!-- Application Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/slide.js"></script>
+    <script src="js/export.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,142 +1,165 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@500;700&family=Inter:wght@400;500;600&display=swap');
+/* quiz/styles.css - Dark Glassmorphism Styles for Quiz Page */
 
-:root {
-    --bg-main: #f8fafc;
-    --card-bg: #ffffff;
-    --text-primary: #0f172a;
-    --text-secondary: #64748b;
-    --accent: #2563eb;
-    --accent-hover: #1d4ed8;
-    --success: #10b981;
-    --error: #ef4444;
-    --border-color: #e2e8f0;
-    --option-bg: #f8fafc;
+.app-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1rem;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--bg-main);
-    color: var(--text-primary);
-    line-height: 1.6;
-    min-height: 100vh;
-    padding: 3rem 1.5rem;
-    background-image: radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.05) 0px, transparent 50%);
-    background-attachment: fixed;
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 2rem;
 }
 
-.app-container { max-width: 800px; margin: 0 auto; z-index: 1; }
-
-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4rem; }
-.header-content h1 { 
-    font-family: 'Outfit', sans-serif;
-    font-size: 2.5rem; font-weight: 700; color: var(--text-primary);
+#quiz-page-title span {
+    background: var(--ai-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
 }
-.header-content p { color: var(--text-secondary); margin-top: 0.5rem; }
 
-.secondary-btn { 
-    background: #fff; color: var(--text-primary); border: 1px solid var(--border-color);
-    padding: 0.8rem 1.5rem; border-radius: 12px; font-weight: 500; 
-    text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;
-}
-.secondary-btn:hover { background: #f1f5f9; }
-
-/* Quiz Card */
+/* Quiz Card styling override */
 .quiz-card {
-    background: var(--card-bg); border: 1px solid var(--border-color);
-    border-radius: 24px; padding: 2.5rem; margin-bottom: 2rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    background: var(--glass-bg) !important;
+    backdrop-filter: var(--glass-blur) !important;
+    -webkit-backdrop-filter: var(--glass-blur) !important;
+    border: 1px solid var(--glass-border) !important;
+    box-shadow: var(--glass-shadow) !important;
+    border-radius: 20px !important;
+    padding: 2rem !important;
+    margin-bottom: 2rem !important;
+    transition: all 0.3s ease;
 }
 
-.status-badge { 
-    display: inline-block; margin-bottom: 1.5rem; padding: 0.4rem 1rem; 
-    border-radius: 30px; font-size: 0.75rem; font-weight: 700; 
+.quiz-card:hover {
+    border-color: rgba(255, 255, 255, 0.2) !important;
 }
-.badge-correct { background: rgba(16, 185, 129, 0.1); color: var(--success); }
-.badge-incorrect { background: rgba(239, 68, 68, 0.1); color: var(--error); }
 
-.question-text { font-size: 1.2rem; font-weight: 600; margin-bottom: 1.5rem; }
+.status-badge {
+    display: inline-block;
+    margin-bottom: 1rem;
+    padding: 0.4rem 1rem;
+    border-radius: 30px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.badge-correct {
+    background: rgba(16, 185, 129, 0.15) !important;
+    color: #34d399 !important;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-incorrect {
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #f87171 !important;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.question-text {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 1.5rem;
+}
+
+.question-text h3 {
+    display: inline-block;
+    color: #a78bfa;
+}
 
 /* Options */
-.options-list { display: flex; flex-direction: column; gap: 0.75rem; }
-.option-label {
-    display: flex; align-items: center; padding: 1.25rem 1.5rem;
-    background: var(--option-bg); border: 1px solid var(--border-color);
-    border-radius: 16px; cursor: pointer; transition: all 0.2s;
+.options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
-.option-label:hover { border-color: var(--accent); background: #fff; }
-.option-label.selected { border-color: var(--accent); background: #eff6ff; color: var(--accent); }
+
+.option-label {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 12px !important;
+    cursor: pointer;
+    color: #cbd5e1;
+    transition: all 0.25s ease;
+}
+
+.option-label:hover {
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #fff;
+}
+
+.option-label.selected {
+    border-color: var(--ai-primary) !important;
+    background: rgba(139, 92, 246, 0.1) !important;
+    color: #c084fc !important;
+    font-weight: 600;
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.15);
+}
 
 .explanation {
-    display: none; margin-top: 1.5rem; padding: 1.5rem;
-    background: #f8fafc; border-left: 4px solid var(--accent);
-    border-radius: 8px; font-size: 0.95rem; color: #475569;
-}
-.quiz-card.show-explanation .explanation { display: block; }
-
-/* Buttons */
-.actions { text-align: center; margin-top: 3rem; }
-.primary-btn { 
-    background: var(--accent); color: white; border: none; 
-    padding: 1.25rem 4rem; border-radius: 16px; font-size: 1.1rem; font-weight: 700; 
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
-}
-.primary-btn:hover { background: var(--accent-hover); transform: translateY(-2px); }
-
-/* Select Styling */
-.select-wrapper {
-    position: relative;
-    display: inline-block;
+    display: none;
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+    background: rgba(0, 0, 0, 0.2) !important;
+    border-left: 4px solid var(--ai-primary) !important;
+    border-radius: 8px !important;
+    font-size: 0.9rem;
+    color: #cbd5e1;
 }
 
-select {
-    background: #fff;
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 0.8rem 2.5rem 0.8rem 1.25rem;
-    font-size: 0.95rem;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: inherit;
-    appearance: none;
-    -webkit-appearance: none;
-    transition: all 0.2s;
-    outline: none;
-}
-
-select:hover {
-    border-color: var(--accent);
-    background: #f8fafc;
-}
-
-.select-wrapper::after {
-    content: '';
-    position: absolute;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    border: 5px solid transparent;
-    border-top-color: var(--text-secondary);
-    pointer-events: none;
+.quiz-card.show-explanation .explanation {
+    display: block !important;
 }
 
 /* Custom Quiz Code Snippet Styles */
 .quiz-code-block {
-    background: #0f172a;
-    color: #f8fafc;
-    padding: 1.25rem 1.5rem;
-    border-radius: 12px;
-    font-family: 'Fira Code', 'Consolas', monospace;
-    font-size: 0.9rem;
-    overflow-x: auto;
-    margin: 1.25rem 0;
-    border: 1px solid #1e293b;
-    line-height: 1.55;
-    text-align: left;
-}
-.quiz-text-line {
-    margin-bottom: 0.6rem;
+    background: #090d16 !important;
+    color: #f8fafc !important;
+    padding: 1rem 1.25rem !important;
+    border-radius: 12px !important;
+    font-family: 'Fira Code', 'Consolas', monospace !important;
+    font-size: 0.85rem !important;
+    overflow-x: auto !important;
+    margin: 1rem 0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    line-height: 1.6 !important;
+    text-align: left !important;
 }
 
+.quiz-text-line {
+    margin-bottom: 0.5rem;
+    color: #e2e8f0;
+    font-weight: 400;
+}
+
+/* Result Modal Overlays */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 9999;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}

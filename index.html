@@ -3,59 +3,351 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI DataEdu Platform | 종합 교육 플랫폼</title>
-    <link rel="stylesheet" href="styles.css?v=20260517">
+    <title>AI DataEdu Platform | AI 기반 개인 맞춤 학습 플랫폼</title>
+    <link rel="stylesheet" href="styles.css?v=20260525">
+    <style>
+        /* 학생 메인 허브 커스텀 스타일 */
+        .selection-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+        .week-tabs {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        .week-tab {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: all 0.3s;
+        }
+        .week-tab:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        .week-tab.active {
+            background: var(--ai-gradient);
+            color: #fff;
+            border: none;
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.3);
+        }
+        .import-box {
+            background: rgba(139, 92, 246, 0.05);
+            border: 1px dashed rgba(139, 92, 246, 0.3);
+            border-radius: 14px;
+            padding: 0.75rem 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .import-box:hover {
+            background: rgba(139, 92, 246, 0.1);
+            border-color: var(--ai-primary);
+        }
+        .current-topic-banner {
+            background: linear-gradient(90deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.05) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .current-topic-info h3 {
+            font-size: 1.6rem;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+        .current-topic-info p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+        .learning-modules {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 4rem;
+        }
+        @media (max-width: 768px) {
+            .learning-modules {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <div class="hero-badge">AI 기반 맞춤 학습</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <div class="hero-badge">AI 기반 맞춤 학습 플랫폼</div>
+                <a href="admin/index.html" class="secondary-btn" style="border-radius: 30px; font-size: 0.85rem; padding: 0.5rem 1.25rem;">
+                    👨‍🏫 교수 전용 도구 (콘텐츠 생성)
+                </a>
+            </div>
             <h1>AI <span>DataEdu Platform</span></h1>
-            <p>과목을 선택하세요</p>
-            <div class="hero-desc">본 플랫폼은 생성형 AI(Gemini)를 활용하여 학생 개별 맞춤 피드백과 즉각적 질문응답을 제공하는 AI 기반 교육혁신 플랫폼입니다.</div>
+            <p>인공지능이 생성한 고품질 커리큘럼을 통해 최적화된 맞춤형 학습을 시작하세요.</p>
         </header>
 
-        <div class="card-grid">
-            <!-- HTML5 웹 프로그래밍 -->
-            <a href="html5/index.html" class="card">
-                <div class="card-icon">🌐</div>
-                <h2>HTML5 웹 프로그래밍</h2>
-                <p>HTML5와 CSS3를 활용한 웹 페이지 레이아웃 설계. 실시간 프리뷰로 코드 결과를 즉시 확인하며 학습합니다.</p>
-                <div class="card-footer">
-                    Enter
+        <!-- Selection Area -->
+        <div class="selection-area">
+            <div>
+                <h4 style="margin-bottom: 0.75rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">학습 주차 선택</h4>
+                <div class="week-tabs" id="week-tabs">
+                    <div class="week-tab active" data-week="1">1주차</div>
+                    <div class="week-tab" data-week="2">2주차</div>
+                </div>
+            </div>
+
+            <!-- Import Local JSON Area -->
+            <div>
+                <h4 style="margin-bottom: 0.75rem; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; text-align: right;">로컬 JSON 파일 등록</h4>
+                <div class="import-box" onclick="document.getElementById('file-import-input').click()">
+                    <span>📥</span>
+                    <div style="text-align: left;">
+                        <span style="font-weight: 600; color: #fff; display: block;">생성한 JSON 가져오기</span>
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">드래그 앤 드롭 또는 클릭</span>
+                    </div>
+                    <input type="file" id="file-import-input" accept=".json" style="display: none;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Week Topic Info -->
+        <div class="current-topic-banner">
+            <div class="current-topic-info">
+                <span class="tag tag-new" id="topic-week-badge" style="margin-bottom: 0.75rem; display: inline-block;">Week 1</span>
+                <h3 id="topic-title">주제 로딩 중...</h3>
+                <p id="topic-desc">인공지능 교육 콘텐츠 분석 결과를 로딩하고 있습니다.</p>
+            </div>
+            <div style="font-size: 3.5rem;" id="topic-icon">🧠</div>
+        </div>
+
+        <div class="section-divider"><span>자기주도 학습 모듈</span></div>
+
+        <!-- Four Core Learning Modules Grid -->
+        <div class="learning-modules">
+            <!-- 1. Quiz -->
+            <a href="#" id="link-quiz" class="card ai-card">
+                <div class="card-icon" style="background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.3); color: #3b82f6;">📝</div>
+                <h2>실전 객관식 퀴즈</h2>
+                <p>AI가 엄선한 난이도별(상/중/하) 10개의 핵심 퀴즈를 풀고, 제출 즉시 제공되는 친절하고 상세한 해설을 통해 개념 오류를 자가 교정합니다.</p>
+                <div class="card-footer" style="color: #3b82f6;">
+                    문제 풀기
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                 </div>
             </a>
 
-            <!-- 알고리즘 -->
-            <a href="algo/index.html" class="card">
-                <div class="card-icon">🧠</div>
-                <div class="card-tags">
-                    <span class="tag tag-ai">🤖 AI 피드백</span>
-                    <span class="tag tag-ai">💬 AI 질문응답</span>
+            <!-- 2. Blank Code -->
+            <a href="#" id="link-code" class="card ai-card">
+                <div class="card-icon" style="background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.3); color: #f59e0b;">💻</div>
+                <h2>코드 빈칸 채우기</h2>
+                <p>알고리즘 뼈대 코드의 빈칸(<code>___</code>)에 들어갈 코드를 직접 타이핑하여 에디터에 작성하고, 정밀 검증 알고리즘을 통해 답안을 점검합니다.</p>
+                <div class="card-footer" style="color: #f59e0b;">
+                    코드 실습
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                 </div>
-                <h2>알고리즘 마스터</h2>
-                <p>개념 학습, 실전 코딩 테스트, 객관식 퀴즈, 강의 자료를 통해 알고리즘 실력을 체계적으로 키웁니다.</p>
-                <div class="card-footer">
-                    Enter
+            </a>
+
+            <!-- 3. Coding Test -->
+            <a href="#" id="link-judge" class="card ai-card">
+                <div class="card-icon" style="background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); color: #10b981;">🛡️</div>
+                <h2>실전 코딩 테스트</h2>
+                <p>브라우저에 내장된 고성능 파이썬3 채점 런타임(Pyodide)을 이용해 AI가 설계한 3가지 실무 문제를 풀고 다중 테스트케이스 채점을 실시간 진행합니다.</p>
+                <div class="card-footer" style="color: #10b981;">
+                    테스트 시작
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </div>
+            </a>
+
+            <!-- 4. Concept Flashcard -->
+            <a href="#" id="link-cards" class="card ai-card">
+                <div class="card-icon" style="background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3); color: #8b5cf6;">🔮</div>
+                <h2>개념 요약 플래시 카드</h2>
+                <p>강의에 등장한 10가지 핵심 용어를 3D 회전 플래시카드 기법으로 재미있고 명료하게 암기하고, 실생활 및 현무 코드 적용 사례를 익힙니다.</p>
+                <div class="card-footer" style="color: #8b5cf6;">
+                    개념 카드 학습
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                 </div>
             </a>
         </div>
 
-        <div class="section-divider"><span>나의 학습</span></div>
+        <div class="section-divider"><span>나의 학습 분석</span></div>
 
-        <div class="card-grid">
+        <div class="card-grid" style="margin-bottom: 6rem;">
             <a href="dashboard/index.html" class="card dashboard-card">
                 <div class="card-icon">📊</div>
-                <h2>나의 학습 현황</h2>
-                <p>퀴즈 점수, 코딩 테스트 통과율, AI 기능 활용 빈도 등 나의 학습 활동을 종합적으로 확인하고 관리합니다.</p>
+                <h2>종합 학습 성취도 대시보드</h2>
+                <p>퀴즈 점수, 코딩테스트 통과 횟수, 실습 빈도 등 나만의 로컬 데이터를 바탕으로 맞춤형 시각화 통계와 AI 취약점 분석 결과를 확인합니다.</p>
                 <div class="card-footer">
-                    View Dashboard
+                    대시보드 보기
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                 </div>
             </a>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const weekTabsContainer = document.getElementById('week-tabs');
+            const topicWeekBadge = document.getElementById('topic-week-badge');
+            const topicTitle = document.getElementById('topic-title');
+            const topicDesc = document.getElementById('topic-desc');
+            const topicIcon = document.getElementById('topic-icon');
+            const fileImportInput = document.getElementById('file-import-input');
+
+            // Module Links
+            const linkQuiz = document.getElementById('link-quiz');
+            const linkCode = document.getElementById('link-code');
+            const linkJudge = document.getElementById('link-judge');
+            const linkCards = document.getElementById('link-cards');
+
+            let currentSelectedWeek = '1';
+
+            // 1. Initial Load (자동 생성 데이터 연동 감지)
+            if (sessionStorage.getItem('local_week_data_active') === 'true') {
+                currentSelectedWeek = 'local';
+                
+                // 기존 탭 비활성화
+                document.querySelectorAll('.week-tab').forEach(t => t.classList.remove('active'));
+                
+                // 생성된 데이터를 위한 전용 탭 동적 생성
+                let localTab = document.createElement('div');
+                localTab.className = 'week-tab active';
+                localTab.dataset.week = 'local';
+                localTab.textContent = '가져온 주차 (방금 생성됨) ✨';
+                weekTabsContainer.appendChild(localTab);
+                
+                // 생성된 로컬 데이터 즉시 로드
+                loadWeekData('local');
+            } else {
+                // 일반적인 초기 진입 시 기본 주차 로드
+                loadWeekData('1');
+            }
+
+            // 2. Week Tab Clicks
+            weekTabsContainer.addEventListener('click', (e) => {
+                const clickedTab = e.target.closest('.week-tab');
+                if (!clickedTab) return;
+
+                document.querySelectorAll('.week-tab').forEach(t => t.classList.remove('active'));
+                clickedTab.classList.add('active');
+
+                const week = clickedTab.dataset.week;
+                currentSelectedWeek = week;
+                loadWeekData(week);
+            });
+
+            // 3. Load Week Content (Direct fetch or local imported)
+            async function loadWeekData(week) {
+                // Remove local session storage if loading normal week
+                if (week !== 'local') {
+                    sessionStorage.removeItem('local_week_data_active');
+                }
+
+                topicWeekBadge.textContent = week === 'local' ? '로컬 가져오기' : `Week ${week}`;
+                topicTitle.textContent = '강의 데이터를 로딩하는 중...';
+                topicDesc.textContent = '데이터 분석이 완려될 때까지 대기해 주세요.';
+                
+                try {
+                    let data;
+                    if (week === 'local') {
+                        const raw = sessionStorage.getItem('local_week_data');
+                        if (!raw) throw new Error("로컬 세션 데이터를 찾을 수 없습니다.");
+                        data = JSON.parse(raw);
+                    } else {
+                        const response = await fetch(`data/week${week}.json?v=${new Date().getTime()}`);
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        data = await response.json();
+                    }
+
+                    // Update UI
+                    topicTitle.textContent = data.topic;
+                    topicDesc.textContent = `${data.quiz.length}개의 퀴즈, ${data.blank_code.length}개의 빈칸 코드, ${data.coding_test.length}개의 코딩 테스트, ${data.cards.length}개의 개념 요약 카드가 포함되어 있습니다.`;
+                    topicIcon.textContent = week === '1' ? '🧠' : (week === '2' ? '🌐' : '⚡');
+
+                    // Sync links
+                    const queryParam = week === 'local' ? '?week=local' : `?week=${week}`;
+                    linkQuiz.href = `quiz/index.html${queryParam}`;
+                    linkCode.href = `code/index.html${queryParam}`;
+                    linkJudge.href = `judge/index.html${queryParam}`;
+                    linkCards.href = `cards/index.html${queryParam}`;
+
+                } catch (err) {
+                    console.error("Failed to load week json data:", err);
+                    topicTitle.textContent = `데이터 로드 실패`;
+                    topicDesc.textContent = `사유: ${err.message}. 'data/week${week}.json' 파일이 서버에 업로드되었는지 확인하거나 로컬 JSON을 직접 가져오기 하세요.`;
+                }
+            }
+
+            // 4. Local JSON File Import Handler
+            fileImportInput.addEventListener('change', (e) => {
+                const file = fileImportInput.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const importedData = JSON.parse(event.target.result);
+                        
+                        // Validation
+                        if (!importedData.topic || !importedData.quiz || !importedData.blank_code || !importedData.coding_test || !importedData.cards) {
+                            throw new Error("규격 스키마와 다른 JSON 구조입니다. 교수 도구에서 생성한 올바른 JSON 파일인지 확인해 주세요.");
+                        }
+
+                        // Save to Session Storage
+                        sessionStorage.setItem('local_week_data', JSON.stringify(importedData));
+                        sessionStorage.setItem('local_week_data_active', 'true');
+
+                        // Create dynamic Local tab if not exists
+                        let localTab = document.querySelector('.week-tab[data-week="local"]');
+                        if (!localTab) {
+                            localTab = document.createElement('div');
+                            localTab.className = 'week-tab';
+                            localTab.dataset.week = 'local';
+                            localTab.textContent = '가져온 주차';
+                            weekTabsContainer.appendChild(localTab);
+                        }
+
+                        // Click Local Tab
+                        localTab.click();
+                        alert("🎉 로컬 학습 데이터가 브라우저에 임시 탑재되었습니다! 배포 없이 바로 학습을 즐기세요.");
+
+                    } catch (err) {
+                        alert(`JSON 파일 가져오기 실패: ${err.message}`);
+                    }
+                };
+                reader.readAsText(file);
+            });
+
+            // 5. Allow Drag and Drop directly on document for json
+            window.addEventListener('dragover', (e) => e.preventDefault());
+            window.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const files = e.dataTransfer.files;
+                if (files.length > 0 && files[0].name.endsWith('.json')) {
+                    fileImportInput.files = files;
+                    const event = new Event('change');
+                    fileImportInput.dispatchEvent(event);
+                }
+            });
+        });
+    </script>
 </body>
 </html>

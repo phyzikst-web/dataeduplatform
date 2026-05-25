@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI DataEdu Platform | 교수 도구 (콘텐츠 생성 및 즉시 연동)</title>
+    <!-- CSS 및 JSZip 라이브러리 -->
+    <link rel="stylesheet" href="../styles.css?v=20260525">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        @media (max-width: 960px) {
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--ai-primary);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
+        }
+        .drag-area {
+            border: 2px dashed rgba(139, 92, 246, 0.4);
+            border-radius: 18px;
+            padding: 3rem 2rem;
+            text-align: center;
+            background: rgba(139, 92, 246, 0.02);
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 1.5rem;
+        }
+        .drag-area:hover, .drag-area.active {
+            border-color: var(--ai-primary);
+            background: rgba(139, 92, 246, 0.08);
+        }
+        .drag-area-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .preview-box {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            height: 480px;
+            overflow-y: auto;
+            font-family: 'Consolas', monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            color: #cbd5e1;
+        }
+        .generate-btn {
+            background: var(--ai-gradient);
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px -10px rgba(139, 92, 246, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .generate-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -10px rgba(139, 92, 246, 0.8);
+        }
+        .generate-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            background: #475569;
+            box-shadow: none;
+        }
+        .spinner-active {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px dashed rgba(255, 255, 255, 0.4);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="max-width: 1200px; padding-bottom: 6rem;">
+        <header style="margin-bottom: 2.5rem; text-align: left;">
+            <a href="../index.html" class="back-link">← 학생 메인 허브로</a>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-top: 1rem;">
+                <span style="font-size: 2.5rem;">👨‍🏫</span>
+                <div>
+                    <h1>교수용 <span>AI 콘텐츠 즉시 연동 생성기</span></h1>
+                    <p style="margin: 0;">PPT 강의 교안을 올리면 구글 AI가 복습 문제를 설계하고, **학생 허브 페이지로 즉시 순간이동 연동**시킵니다.</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="card ai-card" style="padding: 2rem; margin-bottom: 2rem;">
+            <h2>🔑 Google Gemini API 설정</h2>
+            <p style="margin-bottom: 1.25rem; font-size: 0.9rem; color: var(--text-muted);">구글 AI Studio에서 발급받은 무료 API Key를 입력하세요. 입력된 키는 로컬 브라우저에 안전히 보관됩니다.</p>
+            
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="api-key">Gemini API Key</label>
+                <div style="display: flex; gap: 0.75rem;">
+                    <input type="password" id="api-key" placeholder="AIzaSy..." class="form-control" style="flex: 1;">
+                    <button id="save-key-btn" class="primary-btn" style="padding: 0 1.5rem; border-radius: 12px; background: var(--ai-gradient);">저장</button>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.8rem;">
+                    <span id="key-status" style="color: var(--success); font-weight: 500;"></span>
+                    <a href="https://aistudio.google.com/apikey" target="_blank" style="color: #a78bfa; text-decoration: none;">→ Google AI Studio에서 무료 API Key 발급받기</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-grid">
+            <!-- Left Side: PPTX Upload & Setting -->
+            <div class="card" style="padding: 2.5rem;">
+                <h2>📁 PPTX 업로드 및 즉시 연동</h2>
+                <p style="margin-bottom: 1.5rem;">파워포인트(.pptx) 파일을 아래 영역에 끌어다 놓으세요.</p>
+
+                <!-- Drag Area -->
+                <div id="drop-zone" class="drag-area">
+                    <div class="drag-area-icon">📂</div>
+                    <h3 style="margin-bottom: 0.5rem; color: #fff;">파일을 여기에 끌어다 놓으세요</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">또는 내 컴퓨터에서 파일 찾기</p>
+                    <input type="file" id="pptx-input" accept=".pptx" style="display: none;">
+                    <button type="button" class="secondary-btn" style="margin: 0 auto;" onclick="document.getElementById('pptx-input').click()">파일 선택</button>
+                </div>
+
+                <div id="file-info" style="display: none; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span id="file-name" style="font-weight: 600; color: #fff; word-break: break-all;">파일명.pptx</span>
+                        <span id="file-size" style="font-size: 0.85rem; color: var(--text-muted);">0 KB</span>
+                    </div>
+                </div>
+
+                <button id="generate-btn" class="generate-btn" disabled>
+                    <span id="btn-text">⚡ AI 문제 자동 설계 및 학생방 즉시 순간이동 연동</span>
+                </button>
+            </div>
+
+            <!-- Right Side: Text Extraction Preview & Log -->
+            <div class="card" style="padding: 2.5rem;">
+                <h2>🔍 PPTX 텍스트 추출 실시간 결과</h2>
+                <p style="margin-bottom: 1.5rem;">업로드된 완성된 파워포인트 파일의 슬라이드 데이터 파싱 결과입니다.</p>
+                <div class="preview-box" id="extracted-preview">PPTX 파일을 업로드하면 이곳에 추출된 텍스트가 표시됩니다...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const apiKeyInput = document.getElementById('api-key');
+            const saveKeyBtn = document.getElementById('save-key-btn');
+            const keyStatus = document.getElementById('key-status');
+            
+            const dropZone = document.getElementById('drop-zone');
+            const pptxInput = document.getElementById('pptx-input');
+            const fileInfo = document.getElementById('file-info');
+            const fileName = document.getElementById('file-name');
+            const fileSize = document.getElementById('file-size');
+            const generateBtn = document.getElementById('generate-btn');
+            const btnText = document.getElementById('btn-text');
+            const extractedPreview = document.getElementById('extracted-preview');
+
+            let extractedText = '';
+            let pptxFileName = '';
+
+            // 1. API Key Load / Save
+            const savedKey = localStorage.getItem('algoedu_gemini_api_key') || localStorage.getItem('gemini_api_key');
+            if (savedKey) {
+                apiKeyInput.value = savedKey;
+                keyStatus.textContent = '🔒 Google Gemini API Key 안전하게 보관 중입니다.';
+            }
+
+            saveKeyBtn.addEventListener('click', () => {
+                const key = apiKeyInput.value.trim();
+                if (key) {
+                    localStorage.setItem('algoedu_gemini_api_key', key);
+                    localStorage.setItem('gemini_api_key', key);
+                    keyStatus.textContent = '🔒 Google Gemini API Key 성공적으로 저장되었습니다!';
+                } else {
+                    localStorage.removeItem('algoedu_gemini_api_key');
+                    localStorage.removeItem('gemini_api_key');
+                    keyStatus.textContent = '';
+                }
+            });
+
+            // 2. PPTX Drag and Drop Handlers
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('active');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('active');
+                }, false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length > 0 && files[0].name.endsWith('.pptx')) {
+                    handleFile(files[0]);
+                } else {
+                    alert('파워포인트(.pptx) 파일만 업로드 가능합니다!');
+                }
+            });
+
+            pptxInput.addEventListener('change', (e) => {
+                if (pptxInput.files.length > 0) {
+                    handleFile(pptxInput.files[0]);
+                }
+            });
+
+            // 3. PPTX Parsing Logic via JSZip
+            async function handleFile(file) {
+                pptxFileName = file.name;
+                fileName.textContent = file.name;
+                fileSize.textContent = `${(file.size / 1024).toFixed(1)} KB`;
+                fileInfo.style.display = 'block';
+                
+                extractedPreview.textContent = '파워포인트 파일로부터 슬라이드별 핵심 텍스트를 고속 추출하는 중...';
+                
+                try {
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        const arrayBuffer = e.target.result;
+                        const zip = new JSZip();
+                        
+                        try {
+                            const loadedZip = await zip.loadAsync(arrayBuffer);
+                            const slideFiles = [];
+                            
+                            loadedZip.forEach((relativeArrPath, fileObj) => {
+                                const match = relativeArrPath.match(/^ppt\/slides\/slide(\d+)\.xml$/);
+                                if (match) {
+                                    slideFiles.push({
+                                        path: relativeArrPath,
+                                        index: parseInt(match[1]),
+                                        file: fileObj
+                                    });
+                                }
+                            });
+                            
+                            if (slideFiles.length === 0) {
+                                throw new Error("PPTX 파일에 슬라이드가 없거나 형식이 적합하지 않습니다.");
+                            }
+                            
+                            slideFiles.sort((a, b) => a.index - b.index);
+                            let slideTextMap = [];
+                            const ns = "http://schemas.openxmlformats.org/drawingml/2006/main";
+                            
+                            for (let sf of slideFiles) {
+                                const xmlStr = await sf.file.async('text');
+                                const parser = new DOMParser();
+                                const xmlDoc = parser.parseFromString(xmlStr, 'application/xml');
+                                const tTags = xmlDoc.getElementsByTagNameNS(ns, "t");
+                                let slideText = '';
+                                for (let i = 0; i < tTags.length; i++) {
+                                    slideText += tTags[i].textContent + ' ';
+                                }
+                                slideText = slideText.trim().replace(/\s+/g, ' ');
+                                if (slideText) {
+                                    slideTextMap.push(`[Slide ${sf.index}]\n${slideText}`);
+                                }
+                            }
+                            
+                            extractedText = slideTextMap.join('\n\n');
+                            extractedPreview.textContent = `성공적으로 ${slideFiles.length}개의 슬라이드에서 텍스트를 읽었습니다!\n\n${extractedText}`;
+                            generateBtn.disabled = false;
+                            
+                        } catch (err) {
+                            console.error(err);
+                            extractedPreview.textContent = `오류 발생: PPTX 텍스트 추출에 실패했습니다.\n사유: ${err.message}`;
+                            generateBtn.disabled = true;
+                        }
+                    };
+                    reader.readAsArrayBuffer(file);
+                } catch (err) {
+                    console.error(err);
+                    extractedPreview.textContent = `오류 발생: 파일을 읽는 데 실패했습니다.\n사유: ${err.message}`;
+                    generateBtn.disabled = true;
+                }
+            }
+
+            // 4. Google Gemini API Call & Instantly redirect/link with Student Hub
+            generateBtn.addEventListener('click', async () => {
+                const apiKey = localStorage.getItem('algoedu_gemini_api_key') || apiKeyInput.value.trim();
+                if (!apiKey) {
+                    alert('Gemini API Key가 입력되지 않았습니다. 상단 API 설정에서 키를 등록해 주세요!');
+                    apiKeyInput.focus();
+                    return;
+                }
+                
+                if (!extractedText) {
+                    alert('추출된 PPTX 텍스트가 존재하지 않습니다.');
+                    return;
+                }
+
+                // Show dynamic loading button state
+                btnText.innerHTML = `<span class="spinner-active" style="margin-right:8px;"></span> 구글 AI 복습문제 세트 출제 및 연동 중... (10~20초 소요)`;
+                generateBtn.disabled = true;
+                
+                const textBackup = extractedText;
+
+                extractedPreview.innerHTML = `
+                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; text-align:center; padding: 2rem;">
+                        <div style="width:40px; height:40px; border:3px dashed rgba(139,92,246,0.2); border-top-color:#8b5cf6; border-radius:50%; animation:spin 1s linear infinite; margin-bottom:1.5rem;"></div>
+                        <h4 style="color:#fff; margin-bottom:0.75rem; font-size:1.1rem;">🔮 구글 제미나이 AI 복습 교재 생성 중</h4>
+                        <p style="color:var(--text-muted); font-size:0.9rem; line-height:1.6; max-width:320px;">
+                            PPTX 강의 지문을 분석하여 학생용 맞춤형 퀴즈 10개, 빈칸코드 실습 5개, 파이썬 코딩테스트 3개, 개념 요약 카드 10개를 정밀 조립하고 있습니다.<br>
+                            <strong>완료 즉시 학생 메인 허브 화면으로 자동 순간이동 연동됩니다!</strong> ⚡
+                        </p>
+                    </div>
+                `;
+
+                const systemPrompt = `You are a professional computer science professor and education designer.
+Your task is to analyze the lecture text of the slides and generate extremely high-quality university-level educational content in the EXACT JSON format specified.
+You MUST output ONLY valid JSON, starting with { and ending with }. Do not include markdown wraps or additional descriptions.
+
+CRITICAL JSON ESCAPE RULES:
+1. Every string value in the JSON MUST be fully escaped according to standard JSON specifications.
+2. NEVER include raw literal line breaks (actual newlines by hitting Enter) inside any JSON string values. Any newline within codes, descriptions, or explanations MUST be represented explicitly as the two-character string "\\n".
+3. All double quotes (") inside string values (especially inside code snippets, markdown blocks, or quotes) MUST be escaped as \\" to prevent breaking the JSON format.
+4. Keep the JSON structure perfectly clean, ensuring all brackets and braces match and comma placements are structurally valid.`;
+
+                const userPrompt = `다음은 대학교 강의 PPT에서 추출한 슬라이드별 텍스트 내용입니다:
+-----------------------------
+${extractedText}
+-----------------------------
+
+위 강의 자료의 학습 요점을 바탕으로 전문대학 학생들이 웹 브라우저에서 자기주도식 학습을 진행할 수 있는 최적의 혁신적 교육 콘텐츠 패키지를 자동으로 설계하여 아래 분량으로 생성해 주세요:
+
+**[중요 제한사항] 모든 설명, 해설, 문항 내용 등은 무조건 1~2문장 이내로 극도로 간결하게 작성하세요! 데이터가 길어지면 토큰 한도 초과로 응답이 끊어집니다.**
+
+1. 퀴즈(quiz) 객관식 3문제:
+   - 각 문제는 4지선다형 객관식(options 배열에 보기 4개 제공).
+   - answer 인덱스는 0부터 3까지 정답 보기에 해당하는 인덱스 제공.
+   - explanation 필드에 아주 간결한(1문장) 한글 해설 수록.
+   - difficulty는 "상", "중", "하" 중 적절히 배분.
+   - 필요시 question 필드 안에 소스코드나 수식을 포함하되, 개행은 반드시 '\\n' 처리할 것.
+
+2. 빈칸 채우기 코드(blank_code) 2문제:
+   - 프로그래밍 개념이나 주요 알고리즘 뼈대 코드.
+   - 핵심 코드 영역을 '___' (언더바 3개)로 정확히 빈칸 처리한 code 필드 제공.
+   - 빈칸이 온전하게 다 채워진 전체 정답 코드인 answer 제공.
+   - description에 이 코드가 무엇을 수행하는지 짧게(1문장) 설명 제공.
+   - hint에 초보 학생을 위한 짧은 힌트 제공.
+
+3. 코딩테스트 문제(coding_test) 1문제:
+   - title(제목), description(매우 짧은 요구사항), example_input, example_output 제공.
+   - 채점을 수행하기 위한 3개 이상의 테스트케이스(test_cases) 배열 제공.
+   - test_cases의 각 원소는 {"input": "[[인자1, In자2]]", "output": "기댓값"} 형태의 문자열로 제공. (중요: input은 파이썬 함수 호출 시 *args 언패킹이 바로 가능하도록 이중 리스트 구조로 포장).
+
+4. 개념 요약 카드(cards) 3개:
+   - 강의자료 핵심 용어 3개에 대한 초간결 용어 요약집.
+   - term(용어), definition(1문장 정의), example(매우 짧은 예제).
+
+반드시 아래 지정된 JSON 스키마 구조와 대칭적으로 완벽하게 대응되는 JSON을 생성하세요.
+
+규격 JSON 스키마 구조:
+{
+  "week": "local",
+  "topic": "강의 슬라이드 전체 내용을 압축한 대주제명",
+  "quiz": [
+    {
+      "question": "문제 내용",
+      "options": ["보기 1", "보기 2", "보기 3", "보기 4"],
+      "answer": 0,
+      "explanation": "상세한 해설",
+      "difficulty": "하"
+    }
+  ],
+  "blank_code": [
+    {
+      "description": "설명",
+      "code": "빈칸 포함 코드 (빈칸은 ___ 로 표시)",
+      "answer": "정답 코드",
+      "hint": "힌트"
+    }
+  ],
+  "coding_test": [
+    {
+      "title": "문제 제목",
+      "description": "문제 설명",
+      "example_input": "입력 예시",
+      "example_output": "출력 예시",
+      "test_cases": [
+        {"input": "[[입력인자1, 입력인자2]]", "output": "출력기댓값"}
+      ]
+    }
+  ],
+  "cards": [
+    {
+      "term": "용어",
+      "definition": "정의",
+      "example": "예시"
+    }
+  ]
+}`;
+
+                try {
+                    const responseText = await callGeminiAPI(apiKey, "gemini-2.5-flash", systemPrompt, userPrompt);
+                    
+                    let rawResponse = responseText.trim();
+                    // Strip markdown wrap if present
+                    if (rawResponse.startsWith("```")) {
+                        rawResponse = rawResponse.replace(/^```json\s*/i, "").replace(/```$/, "").trim();
+                    }
+                    
+                    // Robust JSON string sanitization for literal newlines and tabs inside strings
+                    function repairJSON(jsonStr) {
+                        let result = '';
+                        let inString = false;
+                        let escapeNext = false;
+                        for (let i = 0; i < jsonStr.length; i++) {
+                            let char = jsonStr[i];
+                            if (escapeNext) {
+                                result += char;
+                                escapeNext = false;
+                                continue;
+                            }
+                            if (char === '\\') {
+                                escapeNext = true;
+                                result += char;
+                                continue;
+                            }
+                            if (char === '"') {
+                                inString = !inString;
+                                result += char;
+                                continue;
+                            }
+                            if (inString) {
+                                if (char === '\n') { result += '\\n'; }
+                                else if (char === '\r') { result += '\\r'; }
+                                else if (char === '\t') { result += '\\t'; }
+                                else { result += char; }
+                            } else {
+                                result += char;
+                            }
+                        }
+                        return result;
+                    }
+                    
+                    const finalData = JSON.parse(repairJSON(rawResponse));
+                    
+                    // 핵심 기획: 생성된 JSON 데이터를 브라우저의 sessionStorage에 즉시 직접 주입!
+                    sessionStorage.setItem('local_week_data', JSON.stringify(finalData));
+                    sessionStorage.setItem('local_week_data_active', 'true');
+                    
+                    // 혹시 모를 로컬 백업용 파일 다운로드 자동 가동
+                    downloadJSON(finalData, `week_local.json`);
+                    
+                    alert('🎉 AI 복습 문제 설계 완료! 로컬 학습 세트가 주입되었습니다. 학생 학습 허브로 강제 연동 순간이동합니다!');
+                    
+                    // 1초 뒤 학생 허브 페이지로 즉각 순간이동 연동!
+                    setTimeout(() => {
+                        window.location.href = '../index.html';
+                    }, 1000);
+                    
+                } catch (err) {
+                    console.error(err);
+                    extractedPreview.textContent = `오류 발생으로 중단되었습니다.\n\n[오류 사유]\n${err.message}\n\n-----------------------------\n[기존 추출 텍스트 복구]\n\n${textBackup}`;
+                    alert(`구글 제미나이 AI 콘텐츠 생성 중 오류가 발생했습니다.\n오류내용: ${err.message}\n\n*팁: API Key가 유효한지 확인하고 재시도해 주세요.`);
+                } finally {
+                    btnText.innerHTML = `⚡ AI 문제 자동 설계 및 학생방 즉시 순간이동 연동`;
+                    generateBtn.disabled = false;
+                }
+            });
+
+            // 5. Google Gemini API Call Wrapper
+            async function callGeminiAPI(apiKey, model, systemInstruction, prompt) {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+                const body = {
+                    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                    systemInstruction: { parts: [{ text: systemInstruction }] },
+                    generationConfig: {
+                        temperature: 0.2,
+                        maxOutputTokens: 8000,
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                week: { type: "STRING" },
+                                topic: { type: "STRING" },
+                                quiz: {
+                                    type: "ARRAY",
+                                    items: {
+                                        type: "OBJECT",
+                                        properties: {
+                                            question: { type: "STRING" },
+                                            options: {
+                                                type: "ARRAY",
+                                                items: { type: "STRING" }
+                                            },
+                                            answer: { type: "INTEGER" },
+                                            explanation: { type: "STRING" },
+                                            difficulty: { type: "STRING" }
+                                        },
+                                        required: ["question", "options", "answer", "explanation", "difficulty"]
+                                    }
+                                },
+                                blank_code: {
+                                    type: "ARRAY",
+                                    items: {
+                                        type: "OBJECT",
+                                        properties: {
+                                            description: { type: "STRING" },
+                                            code: { type: "STRING" },
+                                            answer: { type: "STRING" },
+                                            hint: { type: "STRING" }
+                                        },
+                                        required: ["description", "code", "answer", "hint"]
+                                    }
+                                },
+                                coding_test: {
+                                    type: "ARRAY",
+                                    items: {
+                                        type: "OBJECT",
+                                        properties: {
+                                            title: { type: "STRING" },
+                                            description: { type: "STRING" },
+                                            example_input: { type: "STRING" },
+                                            example_output: { type: "STRING" },
+                                            test_cases: {
+                                                type: "ARRAY",
+                                                items: {
+                                                    type: "OBJECT",
+                                                    properties: {
+                                                        input: { type: "STRING" },
+                                                        output: { type: "STRING" }
+                                                    },
+                                                    required: ["input", "output"]
+                                                }
+                                            }
+                                        },
+                                        required: ["title", "description", "example_input", "example_output", "test_cases"]
+                                    }
+                                },
+                                cards: {
+                                    type: "ARRAY",
+                                    items: {
+                                        type: "OBJECT",
+                                        properties: {
+                                            term: { type: "STRING" },
+                                            definition: { type: "STRING" },
+                                            example: { type: "STRING" }
+                                        },
+                                        required: ["term", "definition", "example"]
+                                    }
+                                }
+                            },
+                            required: ["week", "topic", "quiz", "blank_code", "coding_test", "cards"]
+                        }
+                    }
+                };
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    const errMsg = errData.error ? errData.error.message : `HTTP ${response.status}`;
+                    throw new Error(`Gemini API Error: ${errMsg}`);
+                }
+
+                const resData = await response.json();
+                const candidate = resData.candidates?.[0];
+                if (!candidate || !candidate.content?.parts?.length) {
+                    throw new Error('Gemini API returned an empty response.');
+                }
+                
+                if (candidate.finishReason === 'MAX_TOKENS') {
+                    throw new Error('요청한 데이터양이 너무 많아 응답이 도중에 끊겼습니다. 추출할 텍스트 분량을 줄이거나 생성 문항 수를 줄여주세요.');
+                }
+
+                return candidate.content.parts[0].text;
+            }
+
+            function downloadJSON(data, filename) {
+                const jsonStr = JSON.stringify(data, null, 2);
+                const blob = new Blob([jsonStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        });
+    </script>
+</body>
+</html>

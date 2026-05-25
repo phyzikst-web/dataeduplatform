@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI DataEdu Platform | 개념 플래시 카드</title>
+    <link rel="stylesheet" href="../styles.css?v=20260525">
+    <style>
+        /* 개념 카드 학습용 3D 플래시카드 전용 CSS 스타일 */
+        .deck-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 220px);
+            perspective: 1200px; /* 3D Perspective */
+            margin-top: 1.5rem;
+        }
+        .progress-indicator {
+            width: 100%;
+            max-width: 450px;
+            margin-bottom: 2rem;
+        }
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        .progress-bar-total {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 100px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+        }
+        .progress-bar-current {
+            width: 10%;
+            height: 100%;
+            background: var(--ai-gradient);
+            border-radius: 100px;
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        /* 3D Card Structure */
+        .flashcard-wrapper {
+            width: 100%;
+            max-width: 480px;
+            height: 320px;
+            cursor: pointer;
+            position: relative;
+            user-select: none;
+        }
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-radius: 28px;
+        }
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 28px;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--glass-shadow);
+            border: 1px solid var(--glass-border);
+        }
+        .card-front {
+            background: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(139,92,246,0.03) 100%);
+            border-color: rgba(139, 92, 246, 0.2);
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .card-back {
+            background: linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.95) 100%);
+            border-color: rgba(59, 130, 246, 0.2);
+            transform: rotateY(180deg);
+            justify-content: space-between;
+        }
+        .term-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+        .definition-text {
+            font-size: 1.05rem;
+            color: #e2e8f0;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+        .example-box {
+            background: rgba(139, 92, 246, 0.08);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 14px;
+            padding: 1rem;
+            font-size: 0.85rem;
+            color: #c084fc;
+        }
+        /* Navigation Controls */
+        .controls-row {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin-top: 2.5rem;
+            width: 100%;
+            max-width: 480px;
+            justify-content: space-between;
+        }
+        .nav-circle-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .nav-circle-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+        .nav-circle-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .flip-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body style="min-height: 100vh; padding-bottom: 4rem;">
+    <div class="container" style="max-width: 900px;">
+        <header style="margin-bottom: 2rem; text-align: left;">
+            <a href="../index.html" class="back-link">← 메인 홈으로</a>
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-top: 1rem;">
+                <span style="font-size: 2.2rem;">🔮</span>
+                <div>
+                    <h1 id="cards-page-title">개념 플래시 카드</h1>
+                    <p id="cards-page-desc">강의에 등장한 주요 용어의 핵심 정의와 응용 예시를 3D 플래시카드로 완벽히 습득하세요.</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Flashcard Deck Area -->
+        <div class="deck-container">
+            <!-- Progress Info -->
+            <div class="progress-indicator">
+                <div class="progress-text">
+                    <span id="card-progress-text">개념 1 / 10</span>
+                    <span id="card-percentage">10% 완료</span>
+                </div>
+                <div class="progress-bar-total">
+                    <div class="progress-bar-current" id="progress-bar-current"></div>
+                </div>
+            </div>
+
+            <!-- Flashcard -->
+            <div class="flashcard-wrapper" id="flashcard-wrapper">
+                <div class="flashcard" id="flashcard">
+                    <!-- Front Face (Term) -->
+                    <div class="card-face card-front">
+                        <span class="tag" style="background: rgba(139, 92, 246, 0.1); color: #c084fc; border: 1px solid rgba(139,92,246,0.3); margin-bottom: 1.5rem; font-size: 0.8rem; font-weight: 700;">AI 요약 개념</span>
+                        <div class="term-title" id="card-term">로딩 중...</div>
+                        <div class="flip-hint">
+                            <span>🔄</span> 카드를 누르면 상세 정의가 열립니다.
+                        </div>
+                    </div>
+
+                    <!-- Back Face (Definition & Example) -->
+                    <div class="card-face card-back">
+                        <div>
+                            <span class="tag" style="background: rgba(59, 130, 246, 0.1); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); margin-bottom: 1.25rem; font-size: 0.75rem; font-weight: 700; display: inline-block;">학습 정의 및 해설</span>
+                            <div class="definition-text" id="card-definition">개념에 대한 정의 설명란입니다.</div>
+                        </div>
+                        <div>
+                            <div class="example-box">
+                                <strong style="display: block; margin-bottom: 0.25rem;">🛠️ 실무 적용 예시:</strong>
+                                <span id="card-example">실무 사례 및 코드 적용 예제</span>
+                            </div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 1rem; cursor: pointer;">
+                                🔄 카드를 누르면 용어 화면으로 돌아갑니다.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nav Controls -->
+            <div class="controls-row">
+                <button class="nav-circle-btn" id="prev-btn" title="이전 개념" disabled>
+                    ←
+                </button>
+                <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-muted);" id="deck-stats">
+                    1 / 10
+                </div>
+                <button class="nav-circle-btn" id="next-btn" title="다음 개념">
+                    →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 로컬 트래커 및 카드 제어 로직 -->
+    <script src="../shared/learning-tracker.js"></script>
+    <script src="app.js?v=20260525"></script>
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI DataEdu Platform | 코드 빈칸 채우기</title>
+    <!-- CodeMirror Core -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/theme/dracula.min.css">
+    
+    <!-- CodeMirror JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/mode/python/python.min.js"></script>
+    
+    <!-- Split.js for layout -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.5/split.min.js"></script>
+    
+    <link rel="stylesheet" href="../styles.css?v=20260525">
+    <style>
+        /* 빈칸 채우기 실습실 커스텀 스타일 */
+        .workspace {
+            display: flex;
+            height: calc(100vh - 70px);
+            position: relative;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .panel {
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 18px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: var(--glass-shadow);
+        }
+        .panel-header {
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #a78bfa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .content-scroll {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        .panel-footer {
+            background: rgba(255, 255, 255, 0.02);
+            border-top: 1px solid var(--glass-border);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .gutter {
+            background-color: transparent;
+            background-repeat: no-repeat;
+            background-position: 50%;
+            cursor: col-resize;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            border-bottom: 1px solid var(--glass-border);
+            background: rgba(15, 23, 42, 0.8);
+        }
+        .problem-navigation {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .prob-nav-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .prob-nav-btn:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+        .prob-nav-btn.active {
+            border-color: var(--ai-primary);
+            background: rgba(139, 92, 246, 0.1);
+            color: #c084fc;
+        }
+        .prob-nav-btn.passed {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+            color: #34d399;
+        }
+        .hint-box {
+            background: rgba(139, 92, 246, 0.05);
+            border: 1px solid rgba(139, 92, 246, 0.15);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            display: none;
+        }
+        .comparison-box {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            font-family: 'Consolas', monospace;
+            font-size: 0.85rem;
+            display: none;
+        }
+        .CodeMirror {
+            flex: 1;
+            height: 100% !important;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.95rem;
+            background: transparent !important;
+        }
+        .CodeMirror-gutters {
+            background: transparent !important;
+            border-right: 1px solid var(--glass-border) !important;
+        }
+    </style>
+</head>
+<body style="padding: 0; overflow: hidden; height: 100vh;">
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <a href="../index.html" style="text-decoration: none; color: #a78bfa; font-weight: 800; font-size: 1.2rem; font-family: 'Outfit', sans-serif;">
+                AI DataEdu Code
+            </a>
+            <div style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); border-radius: 8px; padding: 0.25rem 0.75rem; font-size: 0.8rem; font-weight: 600;" id="week-badge">
+                Week 1
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <span style="font-size: 0.85rem; color: var(--text-muted);" id="tracker-stats">실습 완료: 0 / 5</span>
+            <a href="../index.html" class="secondary-btn" style="padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.85rem;">
+                홈으로 돌아가기
+            </a>
+        </div>
+    </nav>
+
+    <!-- Split.js workspace -->
+    <div class="workspace">
+        <!-- Left Side: Problem Statement & Hints -->
+        <div id="split-left" class="panel" style="margin-left: 10px;">
+            <div class="panel-header">
+                <span>실습 설명 & 정답 비교</span>
+                <span id="prob-num-indicator" style="font-size: 0.8rem; color: var(--text-muted);">Q1 / Q5</span>
+            </div>
+            
+            <div class="content-scroll">
+                <!-- Navigation -->
+                <div class="problem-navigation" id="problem-nav">
+                    <button class="prob-nav-btn active" data-index="0">1</button>
+                    <button class="prob-nav-btn" data-index="1">2</button>
+                    <button class="prob-nav-btn" data-index="2">3</button>
+                    <button class="prob-nav-btn" data-index="3">4</button>
+                    <button class="prob-nav-btn" data-index="4">5</button>
+                </div>
+
+                <div class="problem-desc" id="problem-desc">
+                    <h3 style="color:#fff; margin-bottom:1rem;" id="problem-title">문제를 로딩하는 중...</h3>
+                    <p style="color: var(--text-muted);" id="problem-instruction">데이터 수집 결과를 불러오고 있습니다.</p>
+                </div>
+
+                <!-- Hint Box -->
+                <div class="hint-box" id="hint-box">
+                    <strong style="color: #a78bfa; display: block; margin-bottom: 0.5rem;">💡 AI 제공 힌트</strong>
+                    <p style="color: #cbd5e1; font-size: 0.9rem; margin: 0;" id="hint-text">힌트 내용이 표시됩니다.</p>
+                </div>
+
+                <!-- Comparison Box -->
+                <div class="comparison-box" id="comparison-box">
+                    <strong style="color: var(--success); display: block; margin-bottom: 0.5rem;">✅ AI 정답 코드 전체</strong>
+                    <pre style="margin: 0; color: #a7f3d0; line-height: 1.5; overflow-x: auto;" id="correct-code-text"></pre>
+                </div>
+            </div>
+
+            <div class="panel-footer">
+                <button class="secondary-btn" id="hint-btn" style="padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.85rem;">
+                    💡 힌트 보기
+                </button>
+                <button class="secondary-btn" id="show-answer-btn" style="padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.85rem; color: var(--success); border-color: rgba(16, 185, 129, 0.3);" disabled>
+                    ✅ 정답 보기
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Side: Code Editor -->
+        <div id="split-right" class="panel" style="margin-right: 10px;">
+            <div class="panel-header" style="justify-content: space-between;">
+                <span>solution.py</span>
+                <span id="grade-badge" style="background: rgba(255,255,255,0.05); padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">미제출</span>
+            </div>
+
+            <div style="flex: 1; display: flex; flex-direction: column;">
+                <div id="editor-container" style="flex:1; border-bottom: 1px solid var(--glass-border); background: #0c101a;">
+                    <!-- CodeMirror -->
+                </div>
+            </div>
+
+            <div class="panel-footer" style="justify-content: flex-end; gap: 1rem;">
+                <button class="secondary-btn" id="reset-btn" style="padding: 0.75rem 1.5rem; border-radius: 10px; font-size: 0.9rem;">
+                    🔄 초기화
+                </button>
+                <button class="primary-btn" id="submit-btn" style="padding: 0.75rem 2.5rem; border-radius: 10px; font-size: 0.9rem; background: var(--ai-gradient); cursor: pointer;">
+                    🚀 정답 확인 및 제출
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 로컬 트래커 및 학습 모듈 로직 -->
+    <script src="../shared/learning-tracker.js"></script>
+    <script src="app.js?v=20260525"></script>
+</body>
+</html>

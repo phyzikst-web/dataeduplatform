@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
             location.reload();
         }
     });
+
+    document.getElementById('analyze-weakness-btn').addEventListener('click', handleAnalyzeWeakness);
 });
 
 function initDashboard() {
@@ -167,4 +169,93 @@ function renderActivities(activities) {
     });
     
     container.innerHTML = html;
+}
+
+async function handleAnalyzeWeakness() {
+    const stats = LearningTracker.getStats();
+    const activities = LearningTracker.getRecentActivities(20);
+    const btn = document.getElementById('analyze-weakness-btn');
+    const content = document.getElementById('ai-insight-content');
+
+    if (stats.totalActivities === 0) {
+        content.innerHTML = `<p style="color: #fca5a5; text-align: center; padding: 1.5rem 0;">학습 기록이 아직 없습니다. 퀴즈를 풀거나 코딩 테스트를 진행한 후 분석을 요청해 주세요! 🌱</p>`;
+        return;
+    }
+
+    if (!GeminiAPI.hasApiKey()) {
+        GeminiAPI.showApiKeyModal(handleAnalyzeWeakness);
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '분석 진행 중...';
+    content.innerHTML = `
+        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 2rem 0;">
+            <div class="spinner" style="width:30px; height:30px; border:3px dashed rgba(139,92,246,0.3); border-top-color:#8b5cf6; border-radius:50%; animation:spin 1s linear infinite; margin-bottom:1rem;"></div>
+            <p style="color:#a78bfa; animation:pulse 2s infinite; font-size: 0.95rem; text-align:center;">AI가 당신의 학습 데이터를 정밀 분석하고 있습니다...</p>
+        </div>
+    `;
+
+    const recentActStrings = activities.map(a => `- ${a.label} (${a.icon})`).join('\n');
+
+    const prompt = `학생의 학습 통계:
+- 전체 학습 활동 수: ${stats.totalActivities}회
+- 퀴즈 시도 횟수: ${stats.quiz.total}회 (평균 점수: ${stats.quiz.avgScore}%)
+- 코딩 테스트 및 피드백 시도 횟수: ${stats.coding.total}회
+- AI 튜터 피드백 이용 횟수: ${stats.ai.total}회
+
+최근 20개 활동 내역:
+${recentActStrings}
+
+당신은 인공지능 기반 맞춤형 학습 분석 및 설계 전문가입니다. 위의 데이터를 면밀히 분석하여 아래의 마크다운 포맷으로 학생을 처방해 주세요. 존댓말로 아주 정중하고 격려 가득한 조언을 제공해야 합니다.
+
+출력 마크다운 형식:
+### 📊 1. 현재 나의 학습 페이스 요약
+*현재 학습 진도와 열심히 참여한 분야에 대해 긍정적으로 요약 칭찬해 주세요.*
+
+### 🔍 2. AI 정밀 약점 진단
+- **주의 깊게 보아야 할 부분**: *최근 오답이나 부족한 부분(예: 코딩 시도가 없거나 퀴즈 점수가 낮은 점 등)을 날카롭지만 정중하게 짚어주세요.*
+- **취약한 개념 예상**: *활동 기록을 기반으로 취약할 것으로 추정되는 자료구조나 알고리즘을 지적하세요.*
+
+### 🚀 3. 다음 도전을 위한 맞춤 추천 코스
+- **우선 추천 학습**: *학생이 지금 바로 이어서 해야 할 활동(예: 'AI 원클릭 커리큘럼 빌더에서 트리 단원 퀴즈 풀기' 등)을 구체적으로 추천하세요.*
+- **성장 조언**: *학생에게 힘이 되는 따뜻한 격려의 말을 남겨주세요.*
+`;
+
+    try {
+        const responseText = await GeminiAPI.callGemini(prompt, "당신은 세계적인 인공지능 기반 맞춤형 학습 튜터입니다.");
+        typeWriterMarkdown(content, responseText);
+    } catch (error) {
+        content.innerHTML = `<p style="color: #fca5a5; text-align: center; padding: 1.5rem 0;">분석 실패: ${error.message}</p>`;
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'AI 분석 실행';
+    }
+}
+
+function typeWriterMarkdown(targetEl, markdownText, callback) {
+    targetEl.innerHTML = '';
+    let index = 0;
+    const speed = 10;
+    let currentText = '';
+    
+    const interval = setInterval(() => {
+        if (index < markdownText.length) {
+            const chunk = markdownText.substr(index, 4);
+            currentText += chunk;
+            index += chunk.length;
+            
+            targetEl.innerHTML = marked.parse(currentText);
+            
+            // Highlight code blocks
+            targetEl.querySelectorAll('pre code').forEach((block) => {
+                if (!block.classList.contains('hljs')) {
+                    hljs.highlightElement(block);
+                }
+            });
+        } else {
+            clearInterval(interval);
+            if (callback) callback();
+        }
+    }, speed);
 }

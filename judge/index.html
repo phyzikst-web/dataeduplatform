@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Algo Judge | 실전 코딩 테스트 환경</title>
+    <title>AI DataEdu Platform | 실전 코딩 테스트</title>
     <!-- CodeMirror Core -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.css">
     <!-- CodeMirror Themes -->
@@ -15,14 +15,14 @@
     <!-- CodeMirror Core JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/mode/python/python.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/mode/javascript/javascript.min.js"></script>
     
     <!-- Split.js for layout -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.5/split.min.js"></script>
     <!-- Pyodide for Python Execution -->
     <script src="https://cdn.jsdelivr.net/pyodide/v0.23.2/full/pyodide.js"></script>
-    <script src="problems.js" defer></script>
-    <link rel="stylesheet" href="styles.css?v=20260518">
+    
+    <link rel="stylesheet" href="../styles.css?v=20260525">
+    <link rel="stylesheet" href="styles.css?v=20260525">
 </head>
 <body>
     <!-- Navbar -->
@@ -33,7 +33,7 @@
             </a>
             <div class="problem-tab">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="tab-icon"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10M6 10h10"/></svg>
-                <span id="prob-title">문제를 로드하는 중...</span>
+                <span id="prob-title">코딩 테스트 문제를 분석하는 중...</span>
             </div>
         </div>
         
@@ -49,7 +49,6 @@
             <div class="lang-badge">
                 <span>Python3</span>
             </div>
-
 
             <!-- Theme Select -->
             <div class="select-wrapper">
@@ -82,14 +81,10 @@
                 <span>문제 설명</span>
             </div>
             <div class="content-scroll problem-desc" id="prob-desc">
-                <p style="color: var(--text-secondary);">상단 메뉴에서 문제를 선택하여 시작하세요.</p>
+                <p style="color: var(--text-secondary);">강의 자료에서 설계된 코딩 테스트 문항을 배치하고 있습니다...</p>
             </div>
             <div class="panel-footer">
                 <div class="footer-left">
-                    <button class="action-btn" onclick="alert('준비 중인 기능입니다. 질문이 있으시면 게시판을 이용해 주세요!')">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                        질문하기
-                    </button>
                     <button id="reset-code-btn" class="action-btn text-danger" title="작성한 코드를 초기 상태로 되돌립니다.">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
                         초기화
@@ -98,7 +93,7 @@
                 <div class="footer-right">
                     <button id="run-btn" class="run-btn" disabled>
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                        <span>코드 실행 (Ctrl+Enter)</span>
+                        <span>코드 실행 및 채점 (Ctrl+Enter)</span>
                     </button>
                 </div>
             </div>
@@ -116,7 +111,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="editor-container">
+                <div id="editor-container" style="background: #0f172a;">
                     <!-- CodeMirror will be initialized here -->
                 </div>
             </div>
@@ -124,18 +119,19 @@
             <!-- Terminal Panel -->
             <div id="terminal-pane" class="panel">
                 <div class="panel-header flex-between">
-                    <span>실행 결과</span>
+                    <span>실행 및 컴파일 채점 결과</span>
                     <button id="clear-terminal" class="icon-btn" title="결과창 지우기">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                     </button>
                 </div>
                 <div class="terminal content-scroll" id="terminal-output">
-                    <div class="term-line term-info">준비 완료. 문제를 선택하고 코드를 작성해 보세요.</div>
+                    <div class="term-line term-info">준비 완료. 파이썬 채점 환경을 준비하고 있습니다...</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <script src="../shared/learning-tracker.js"></script>
+    <script src="app.js?v=20260525"></script>
 </body>
 </html>

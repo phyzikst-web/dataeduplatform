@@ -1,21 +1,30 @@
 // algo/ai-feedback/app.js
 
-const systemPrompt = `당신은 자료구조 및 알고리즘 전문 코드 리뷰어입니다. 
-학생이 제출한 코드를 분석하여 다음 항목을 한국어로 답변하세요:
+const systemPrompt = `당신은 자료구조 및 알고리즘 전문 "소크라테스식" 코드 튜터입니다. 
+당신의 역할은 학생이 스스로 답을 찾을 수 있도록 돕는 것입니다. 절대로 정답 코드를 한 번에 제공하지 마십시오.
 
-## 📋 코드 분석
-코드의 전반적인 동작을 설명하세요.
+출력은 반드시 다음 마크다운 형식을 지켜주세요:
 
-## 🐛 오류 및 버그
-발견된 오류나 잠재적 버그를 설명하세요. 없다면 "발견된 오류가 없습니다"라고 답하세요.
+# 🧩 AI 튜터 소크라테스식 피드백
 
-## 💡 개선 제안
-코드 품질, 가독성, 효율성 측면에서 개선할 점을 제안하세요.
+## 📊 1. 코드 분석 및 복잡도
+- **현재 시간 복잡도**: O(...)
+- **목표 시간 복잡도**: O(...) (더 개선될 여지가 있다면)
+- **현재 공간 복잡도**: O(...)
+*학생이 작성한 코드의 핵심 로직과 연산 방식을 분석하여 작성하세요.*
 
-## ⏱️ 복잡도 분석
-시간복잡도와 공간복잡도를 분석하세요.
+## 🔍 2. 무엇을 잘했나요? (칭찬 한마디)
+*코드의 긍정적인 부분(예: 변수 이름, 가독성, 예외 처리 등)을 구체적으로 칭찬해 주세요.*
 
-마크다운 형식으로 출력하세요. 코드 예시는 \`\`\`로 감싸세요.`;
+## 💡 3. 소크라테스식 질문과 힌트 (스스로 생각해보세요)
+*직접적인 코드는 주지 말고, 학생이 범한 논리적 오류나 성능 개선 지점을 지적하며 다음 질문을 던져주세요:*
+- **질문 1**: *로직의 경계값이나 특정 입력을 가정하고 생각하게 만드는 질문*
+- **질문 2**: *성능이나 불필요한 연산을 줄이기 위한 실마리를 제공하는 질문*
+*학생이 막혔을 때 힌트가 되는 의사코드(Pseudocode)나 핵심 아이디어만 텍스트로 제시하세요.*
+
+## 🚀 4. 도전해볼 만한 방향성
+*어떤 알고리즘 기법이나 자료구조를 찾아봐야 하는지 로드맵을 알려주세요. (예: DP, Sliding Window 등)*
+`;
 
 let editor;
 let currentLang = 'python';
@@ -74,8 +83,9 @@ async function handleFeedbackRequest() {
     const btn = document.getElementById('feedback-btn');
     btn.disabled = true;
 
-    // Show loading state
+    // Show loading state and start scanner animation
     showState('loading');
+    document.getElementById('editor-scanner').style.display = 'block';
 
     const prompt = `[Language: ${currentLang}]\n\n${code}`;
 
@@ -88,18 +98,15 @@ async function handleFeedbackRequest() {
             topic: code.substring(0, 30).replace(/\n/g, ' ') + '...'
         });
 
-        // Show result state
-        const resultContainer = document.getElementById('state-result');
-        resultContainer.innerHTML = marked.parse(responseText);
-        
-        // Apply syntax highlighting to code blocks in markdown
-        resultContainer.querySelectorAll('pre code').forEach((block) => {
-            hljs.highlightElement(block);
-        });
-
+        // Hide scanner and show result with typewriter effect
+        document.getElementById('editor-scanner').style.display = 'none';
         showState('result');
+        
+        const resultContainer = document.getElementById('state-result');
+        typeWriterMarkdown(resultContainer, responseText);
 
     } catch (error) {
+        document.getElementById('editor-scanner').style.display = 'none';
         if (error.code === 'API_KEY_MISSING') {
             GeminiAPI.showApiKeyModal(handleFeedbackRequest);
             showState('empty');
@@ -110,6 +117,40 @@ async function handleFeedbackRequest() {
     } finally {
         btn.disabled = false;
     }
+}
+
+function typeWriterMarkdown(targetEl, markdownText, callback) {
+    targetEl.innerHTML = '';
+    let index = 0;
+    const speed = 10; // ms per step
+    let currentText = '';
+    
+    // Auto-scroll target is the scrollable result container
+    const container = document.getElementById('result-container');
+    
+    const interval = setInterval(() => {
+        if (index < markdownText.length) {
+            // Type a small chunk of chars at a time to keep it snappy but animated
+            const chunk = markdownText.substr(index, 4);
+            currentText += chunk;
+            index += chunk.length;
+            
+            targetEl.innerHTML = marked.parse(currentText);
+            
+            // Highlight code blocks
+            targetEl.querySelectorAll('pre code').forEach((block) => {
+                if (!block.classList.contains('hljs')) {
+                    hljs.highlightElement(block);
+                }
+            });
+            
+            // Scroll down as new text generates
+            container.scrollTop = container.scrollHeight;
+        } else {
+            clearInterval(interval);
+            if (callback) callback();
+        }
+    }, speed);
 }
 
 function showState(stateId) {
