@@ -248,7 +248,6 @@ async function initMaterialsApp() {
             desc = '수업 학습을 돕기 위해 선생님께서 등록하신 보조 교육 자료 파일입니다. 다운로드하여 활용해 보세요.';
         }
 
-        let embedHtml = '';
         if (ext === 'pptx' || ext === 'docx') {
             const baseUrl = window.location.hostname.includes('github.io') 
                 ? window.location.href.substring(0, window.location.href.lastIndexOf('/')) 
@@ -256,49 +255,71 @@ async function initMaterialsApp() {
             const fileUrl = encodeURIComponent(`${baseUrl}/${item.filename}`);
             const viewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${fileUrl}`;
             
-            embedHtml = `
-                <div class="embed-container" style="margin-top: 2rem; margin-bottom: 2rem; width: 100%; max-width: 900px; height: 60vh; border-radius: 12px; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);">
+            downloadCardContainer.style.flexDirection = 'column';
+            downloadCardContainer.style.justifyContent = 'flex-start';
+            downloadCardContainer.style.overflowY = 'auto';
+            downloadCardContainer.style.padding = '1rem';
+
+            downloadCardContainer.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 1000px; margin-bottom: 1rem; background: #ffffff; padding: 1rem 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); flex-shrink: 0;">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <div style="font-size: 2rem;">${ext === 'pptx' ? '📊' : '📄'}</div>
+                        <div>
+                            <h3 style="margin: 0; font-size: 1.2rem; color: #1e293b;">${item.title}</h3>
+                            <span style="font-size: 0.85rem; color: #64748b; font-weight: 600;">${item.week} | ${item.filename}</span>
+                        </div>
+                    </div>
+                    <a href="${item.filename}" download class="download-btn-premium" style="padding: 0.6rem 1.2rem; font-size: 0.95rem; font-weight: 700; background: linear-gradient(135deg, ${themeColor}e0, ${themeColor}); box-shadow: 0 4px 10px -2px ${themeColor}33; display: flex; align-items: center; gap: 0.5rem; color: white; text-decoration: none; border-radius: 8px; transition: transform 0.2s;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        다운로드
+                    </a>
+                </div>
+                <div class="embed-container" style="width: 100%; max-width: 1000px; height: 80vh; border-radius: 12px; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); flex-shrink: 0; margin-bottom: 2rem;">
                     <iframe src="${viewerUrl}" width="100%" height="100%" frameborder="0" title="Office Viewer"></iframe>
-                    <div style="text-align: center; font-size: 0.85rem; color: #64748b; padding: 0.75rem; background: #f8fafc; border-top: 1px solid #cbd5e1;">
-                        ※ 미리보기가 안 나올 경우, 상단의 다운로드 버튼을 이용해 주세요. (로컬 환경에서는 미리보기가 지원되지 않습니다)
+                    <div style="text-align: center; font-size: 0.85rem; color: #64748b; padding: 0.5rem; background: #f8fafc; border-top: 1px solid #cbd5e1;">
+                        ※ 미리보기가 안 나올 경우, 우측 상단의 다운로드 버튼을 이용해 주세요. (로컬 환경에서는 미리보기가 지원되지 않습니다)
                     </div>
                 </div>
             `;
+        } else {
+            downloadCardContainer.style.flexDirection = 'column';
+            downloadCardContainer.style.justifyContent = 'center';
+            downloadCardContainer.style.overflowY = 'auto';
+            downloadCardContainer.style.padding = '2rem';
+
+            downloadCardContainer.innerHTML = `
+                <div class="download-card" style="margin-top: 2rem; flex-shrink: 0;">
+                    ${iconHtml}
+                    <div class="file-meta-tag" style="background-color: ${themeColor}12; color: ${themeColor}; border: 1px solid ${themeColor}20;">
+                        ${fileTypeLabel}
+                    </div>
+                    <h3 class="file-title">${item.title}</h3>
+                    <p class="file-desc">${desc}</p>
+                    <div class="file-details">
+                        <div class="detail-row">
+                            <span class="detail-lbl">과정 주차</span>
+                            <span class="detail-val-badge">${item.week}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-lbl">파일명</span>
+                            <span class="detail-val-code">${item.filename}</span>
+                        </div>
+                    </div>
+                    <a href="${item.filename}" download class="download-btn-premium" style="background: linear-gradient(135deg, ${themeColor}e0, ${themeColor}); box-shadow: 0 10px 25px -5px ${themeColor}33;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        학습 자료 다운로드
+                    </a>
+                </div>
+            `;
         }
-
-        downloadCardContainer.style.flexDirection = 'column';
-        downloadCardContainer.style.justifyContent = 'flex-start';
-        downloadCardContainer.style.overflowY = 'auto';
-
-        downloadCardContainer.innerHTML = `
-            <div class="download-card" style="margin-top: 2rem; flex-shrink: 0;">
-                ${iconHtml}
-                <div class="file-meta-tag" style="background-color: ${themeColor}12; color: ${themeColor}; border: 1px solid ${themeColor}20;">
-                    ${fileTypeLabel}
-                </div>
-                <h3 class="file-title">${item.title}</h3>
-                <p class="file-desc">${desc}</p>
-                <div class="file-details">
-                    <div class="detail-row">
-                        <span class="detail-lbl">과정 주차</span>
-                        <span class="detail-val-badge">${item.week}</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-lbl">파일명</span>
-                        <span class="detail-val-code">${item.filename}</span>
-                    </div>
-                </div>
-                <a href="${item.filename}" download class="download-btn-premium" style="background: linear-gradient(135deg, ${themeColor}e0, ${themeColor}); box-shadow: 0 10px 25px -5px ${themeColor}33;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7 10 12 15 17 10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                    학습 자료 다운로드
-                </a>
-            </div>
-            ${embedHtml}
-        `;
     }
 }
 
