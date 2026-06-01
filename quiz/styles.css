@@ -39,7 +39,7 @@ header {
 }
 
 .quiz-card:hover {
-    border-color: rgba(255, 255, 255, 0.2) !important;
+    border-color: #cbd5e1 !important;
 }
 
 .status-badge {
@@ -66,13 +66,13 @@ header {
 .question-text {
     font-size: 1.15rem;
     font-weight: 600;
-    color: #fff;
+    color: #0f172a;
     margin-bottom: 1.5rem;
 }
 
 .question-text h3 {
     display: inline-block;
-    color: #a78bfa;
+    color: #6d28d9;
 }
 
 /* Options */
@@ -86,37 +86,37 @@ header {
     display: flex;
     align-items: center;
     padding: 1rem 1.25rem;
-    background: rgba(255, 255, 255, 0.02) !important;
-    border: 1px solid var(--glass-border) !important;
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
     border-radius: 12px !important;
     cursor: pointer;
-    color: #cbd5e1;
+    color: #334155;
     transition: all 0.25s ease;
 }
 
 .option-label:hover {
-    border-color: rgba(255, 255, 255, 0.25) !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    color: #fff;
+    border-color: #94a3b8 !important;
+    background: #f8fafc !important;
+    color: #0f172a;
 }
 
 .option-label.selected {
-    border-color: var(--ai-primary) !important;
-    background: rgba(139, 92, 246, 0.1) !important;
-    color: #c084fc !important;
+    border-color: #6366f1 !important;
+    background: #e0e7ff !important;
+    color: #4338ca !important;
     font-weight: 600;
-    box-shadow: 0 0 10px rgba(139, 92, 246, 0.15);
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.15);
 }
 
 .explanation {
     display: none;
     margin-top: 1.5rem;
     padding: 1.25rem;
-    background: rgba(0, 0, 0, 0.2) !important;
+    background: #f8fafc !important;
     border-left: 4px solid var(--ai-primary) !important;
     border-radius: 8px !important;
     font-size: 0.9rem;
-    color: #cbd5e1;
+    color: #334155;
 }
 
 .quiz-card.show-explanation .explanation {
@@ -125,22 +125,22 @@ header {
 
 /* Custom Quiz Code Snippet Styles */
 .quiz-code-block {
-    background: #090d16 !important;
-    color: #f8fafc !important;
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
     padding: 1rem 1.25rem !important;
     border-radius: 12px !important;
     font-family: 'Fira Code', 'Consolas', monospace !important;
     font-size: 0.85rem !important;
     overflow-x: auto !important;
     margin: 1rem 0 !important;
-    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid #e2e8f0 !important;
     line-height: 1.6 !important;
     text-align: left !important;
 }
 
 .quiz-text-line {
     margin-bottom: 0.5rem;
-    color: #e2e8f0;
+    color: #334155;
     font-weight: 400;
 }
 
