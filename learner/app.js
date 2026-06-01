@@ -5,13 +5,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateBtn = document.getElementById('generate-btn');
     const backBtn = document.getElementById('back-btn');
     const checkBtn = document.getElementById('check-btn');
-    const resetBtn = document.getElementById('reset-btn');
     
+    // Practice View Elements
+    const dynamicWorkArea = document.getElementById('dynamic-work-area');
+    const stageTitle = document.getElementById('stage-title');
+    const stageDesc = document.getElementById('stage-desc');
+    const progressBarFill = document.getElementById('progress-bar-fill');
+    const progressText = document.getElementById('progress-text');
+    const repeatText = document.getElementById('repeat-text');
+    
+    // Modal Elements
+    const resultModal = document.getElementById('result-modal');
+    const studentNameInput = document.getElementById('student-name');
+    const copyResultBtn = document.getElementById('copy-result-btn');
+    const downloadImgBtn = document.getElementById('download-img-btn');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const captureArea = document.getElementById('capture-area');
+    const certName = document.getElementById('cert-name');
+
+    // State
+    let originalCode = '';
+    let currentStage = 0;
+    let typingCount = 0;
+    const MAX_TYPING = 3;
+    let modeData = {};
+
     // Load pre-hosted notebooks if available
     if (typeof NOTEBOOKS !== 'undefined' && NOTEBOOKS.length > 0) {
         notebookSelect.innerHTML = '';
-        
-        // Add placeholder option
         const placeholderOpt = document.createElement('option');
         placeholderOpt.value = "";
         placeholderOpt.textContent = "실습 주피터 노트북을 선택해 주세요";
@@ -36,15 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 
                 window.currentNotebook = await response.json();
-                window.answerNotebook = null;
-                if (notebookMeta.answerpath) {
-                    try {
-                        const ansRes = await fetch(notebookMeta.answerpath);
-                        if (ansRes.ok) window.answerNotebook = await ansRes.json();
-                    } catch (e) {
-                        console.warn("Answer notebook load failed", e);
-                    }
-                }
                 
                 let combined = '';
                 if (window.currentNotebook.cells) {
@@ -61,65 +73,113 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
-    // Mode UI Elements
-    const difficultySlider = document.getElementById('difficulty-slider');
-    const difficultyValue = document.getElementById('difficulty-value');
-    
-    // Practice View Elements
-    const practiceContainer = document.getElementById('practice-container');
-    const commentBankContainer = document.getElementById('comment-bank-container');
-    const commentBank = document.getElementById('comment-bank');
-    const qaDisplayContainer = document.getElementById('qa-display-container');
-    const qaDisplayQuestion = document.getElementById('qa-display-question');
-    const qaStudentAnswer = document.getElementById('qa-student-answer');
-    
-    // Modal Elements
-    const resultModal = document.getElementById('result-modal');
-    const studentNameInput = document.getElementById('student-name');
-    const copyResultBtn = document.getElementById('copy-result-btn');
-    const downloadImgBtn = document.getElementById('download-img-btn');
-    const closeModalBtn = document.getElementById('close-modal-btn');
-    const captureArea = document.getElementById('capture-area');
-    const certName = document.getElementById('cert-name');
 
-    // State
-    let originalCode = '';
-    let currentMode = 'blank';
-    let modeData = {};
-
-    difficultySlider.addEventListener('input', (e) => { difficultyValue.textContent = e.target.value; });
     backBtn.addEventListener('click', () => switchView('setup'));
-    resetBtn.addEventListener('click', () => generatePractice());
-    checkBtn.addEventListener('click', () => checkAnswers());
-
+    
     generateBtn.addEventListener('click', () => {
         if (!originalCode) return alert('실습 주피터 노트북을 선택해 주세요!');
-        generatePractice();
+        currentStage = 0;
+        typingCount = 0;
+        startStage(currentStage);
         switchView('practice');
     });
 
-    // Main Router
+    checkBtn.addEventListener('click', () => {
+        checkCurrentStage();
+    });
+
     function switchView(viewName) {
         Object.values(views).forEach(v => v.classList.remove('active'));
         views[viewName].classList.add('active');
     }
-
-    function generatePractice() {
-        practiceContainer.innerHTML = '';
-        practiceContainer.classList.remove('notebook-view');
-        commentBankContainer.style.display = 'none';
-        qaDisplayContainer.style.display = 'none';
-        
-        const actionButtons = document.querySelector('#practice-view .action-buttons');
-        if (actionButtons) actionButtons.style.display = 'flex';
-        
-        modeData = {};
-        generateBlankFill();
+    
+    function updateProgress() {
+        const totalStages = 6; // 0 to 5
+        let progress = (currentStage / totalStages) * 100;
+        if (currentStage === 0) {
+            progress = (typingCount / (MAX_TYPING * totalStages)) * 100;
+            repeatText.style.display = 'block';
+            repeatText.textContent = `반복: ${typingCount}/${MAX_TYPING}`;
+        } else {
+            repeatText.style.display = 'none';
+        }
+        progressBarFill.style.width = `${progress}%`;
+        progressText.textContent = `진행률: ${Math.round(progress)}%`;
     }
 
-    // 1. Blank Fill Mode
-    function generateBlankFill() {
+    function startStage(stage) {
+        dynamicWorkArea.innerHTML = '';
+        modeData = {};
+        updateProgress();
+
+        switch (stage) {
+            case 0:
+                stageTitle.textContent = "Stage 0: 타이핑 연습";
+                stageDesc.textContent = "원본 코드를 보며 정확히 따라 타이핑하세요. 기호와 띄어쓰기에 주의하세요.";
+                renderTypingStage();
+                break;
+            case 1:
+                stageTitle.textContent = "Stage 1: 워밍업 (빈칸 채우기)";
+                stageDesc.textContent = "핵심 키워드를 채워넣으세요. (난이도: 하)";
+                renderBlankStage(0.1); // 10%
+                break;
+            case 2:
+                stageTitle.textContent = "Stage 2: 코어 로직 완성";
+                stageDesc.textContent = "알고리즘의 핵심 로직을 완성하세요. (난이도: 중)";
+                renderBlankStage(0.3); // 30%
+                break;
+            case 3:
+                stageTitle.textContent = "Stage 3: 디버깅";
+                stageDesc.textContent = "다음 코드에는 논리적 오류가 숨어있습니다. 찾아서 올바르게 수정하세요.";
+                renderDebuggingStage();
+                break;
+            case 4:
+                stageTitle.textContent = "Stage 4: 실행 흐름 추적";
+                stageDesc.textContent = "코드를 머릿속으로 실행해보고, 최종 출력 결과를 예측하여 적어보세요.";
+                renderTracingStage();
+                break;
+            case 5:
+                stageTitle.textContent = "Stage 5: 미니 챌린지";
+                stageDesc.textContent = "배운 내용을 바탕으로 새로운 기능을 추가해 보세요.";
+                renderChallengeStage();
+                break;
+            default:
+                finishAllStages();
+                break;
+        }
+    }
+
+    // --- Rendering Stages ---
+
+    function renderTypingStage() {
+        // Original Code View
+        const origContainer = document.createElement('div');
+        origContainer.className = 'code-cell';
+        origContainer.style.marginBottom = '1rem';
+        origContainer.innerHTML = `<pre><code>${hljs.highlight(originalCode, {language: 'python'}).value}</code></pre>`;
+        dynamicWorkArea.appendChild(origContainer);
+
+        // Typing Area
+        const textArea = document.createElement('textarea');
+        textArea.id = 'typing-input';
+        textArea.className = 'notebook-code-editor';
+        textArea.placeholder = "여기에 코드를 타이핑하세요...";
+        textArea.style.minHeight = '200px';
+        textArea.style.background = '#0f172a';
+        textArea.style.padding = '1rem';
+        textArea.style.borderRadius = '8px';
+        textArea.style.border = '1px solid var(--border-color)';
+        
+        textArea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            this.classList.remove('correct', 'incorrect');
+        });
+        
+        dynamicWorkArea.appendChild(textArea);
+    }
+
+    function renderBlankStage(difficultyRatio) {
         const tokenRegex = /([a-zA-Z0-9_]+)|(\s+)|([^a-zA-Z0-9_\s]+)/g;
         let parsedTokens = [];
         let match;
@@ -130,21 +190,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const wordIndices = parsedTokens.map((t, i) => t.type === 'word' ? i : -1).filter(i => i !== -1);
-        const difficultyRatio = parseInt(difficultySlider.value) / 100;
         shuffleArray(wordIndices);
         const blankIndices = wordIndices.slice(0, Math.max(1, Math.floor(wordIndices.length * difficultyRatio)));
         
         modeData = { parsedTokens, blankIndices };
 
+        const container = document.createElement('div');
+        container.className = 'code-container notebook-view';
         const pre = document.createElement('pre');
         const code = document.createElement('code');
         pre.appendChild(code);
-        practiceContainer.appendChild(pre);
+        container.appendChild(pre);
+        dynamicWorkArea.appendChild(container);
 
         parsedTokens.forEach((token, index) => {
             if (blankIndices.includes(index)) {
                 const input = document.createElement('input');
-                input.type = 'text'; input.className = 'blank-input';
+                input.type = 'text'; input.className = 'notebook-blank-input';
                 input.dataset.answer = token.value;
                 input.maxLength = token.value.length + 5;
                 input.style.width = `${Math.max(3, token.value.length)}ch`;
@@ -156,25 +218,173 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Checking Logic
-    function checkAnswers() {
-        let allCorrect = true;
-        let checkedCount = 0;
-
-        document.querySelectorAll('.blank-input').forEach(input => {
-            input.classList.remove('correct', 'incorrect');
-            if (input.value.trim() === input.dataset.answer) {
-                input.classList.add('correct');
-            } else {
-                input.classList.add('incorrect');
-                allCorrect = false;
-            }
-            checkedCount++;
+    function renderDebuggingStage() {
+        // Option A: Use placeholder data for now until notebook.js is updated
+        const dummyBugCode = originalCode.replace(/return/g, "break"); // Simple dummy bug
+        
+        const container = document.createElement('div');
+        container.className = 'code-container notebook-view';
+        
+        const textArea = document.createElement('textarea');
+        textArea.id = 'debug-input';
+        textArea.className = 'notebook-code-editor';
+        textArea.value = dummyBugCode;
+        textArea.style.minHeight = '300px';
+        
+        textArea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            this.classList.remove('correct', 'incorrect');
         });
+        
+        container.appendChild(textArea);
+        dynamicWorkArea.appendChild(container);
+    }
 
-        if (checkedCount > 0 && allCorrect) {
-            setTimeout(() => resultModal.classList.add('active'), 300);
+    function renderTracingStage() {
+        const origContainer = document.createElement('div');
+        origContainer.className = 'code-cell';
+        origContainer.innerHTML = `<pre><code>${hljs.highlight(originalCode, {language: 'python'}).value}</code></pre>`;
+        dynamicWorkArea.appendChild(origContainer);
+
+        const inputGroup = document.createElement('div');
+        inputGroup.className = 'input-group';
+        inputGroup.style.marginTop = '2rem';
+        
+        const label = document.createElement('label');
+        label.textContent = "Q. 위 코드가 실행되었을 때 최종 출력 결과는 무엇일까요?";
+        label.style.fontWeight = 'bold';
+        label.style.display = 'block';
+        label.style.marginBottom = '0.5rem';
+        
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.id = 'trace-input';
+        input.className = 'text-input';
+        input.placeholder = "예: [1, 2, 3]";
+        
+        inputGroup.appendChild(label);
+        inputGroup.appendChild(input);
+        dynamicWorkArea.appendChild(inputGroup);
+    }
+
+    function renderChallengeStage() {
+        const origContainer = document.createElement('div');
+        origContainer.className = 'code-cell';
+        origContainer.innerHTML = `<pre><code>${hljs.highlight(originalCode, {language: 'python'}).value}</code></pre>`;
+        dynamicWorkArea.appendChild(origContainer);
+
+        const inputGroup = document.createElement('div');
+        inputGroup.className = 'input-group';
+        inputGroup.style.marginTop = '2rem';
+        
+        const label = document.createElement('label');
+        label.textContent = "미션: 데이터의 크기를 반환하는 size() 메서드(또는 함수)를 추가해보세요.";
+        label.style.fontWeight = 'bold';
+        label.style.display = 'block';
+        label.style.marginBottom = '0.5rem';
+        
+        const textArea = document.createElement('textarea');
+        textArea.id = 'challenge-input';
+        textArea.className = 'notebook-code-editor';
+        textArea.placeholder = "여기에 응용 코드를 작성하세요...";
+        textArea.style.minHeight = '150px';
+        textArea.style.background = '#0f172a';
+        textArea.style.padding = '1rem';
+        textArea.style.borderRadius = '8px';
+        textArea.style.border = '1px solid var(--border-color)';
+        
+        inputGroup.appendChild(label);
+        inputGroup.appendChild(textArea);
+        dynamicWorkArea.appendChild(inputGroup);
+    }
+
+    // --- Checking Logic ---
+
+    function checkCurrentStage() {
+        let isPass = false;
+
+        if (currentStage === 0) {
+            const inputEl = document.getElementById('typing-input');
+            const userText = inputEl.value;
+            // Ignore whitespace for similarity
+            const cleanUser = userText.replace(/\s+/g, '');
+            const cleanOrig = originalCode.replace(/\s+/g, '');
+            
+            if (cleanUser === cleanOrig) {
+                inputEl.classList.add('correct');
+                isPass = true;
+                typingCount++;
+                if (typingCount < MAX_TYPING) {
+                    setTimeout(() => {
+                        inputEl.value = '';
+                        inputEl.classList.remove('correct');
+                        updateProgress();
+                    }, 1000);
+                    return; // Don't advance stage yet
+                }
+            } else {
+                inputEl.classList.add('incorrect');
+            }
+        } 
+        else if (currentStage === 1 || currentStage === 2) {
+            let allCorrect = true;
+            document.querySelectorAll('.notebook-blank-input').forEach(input => {
+                input.classList.remove('correct', 'incorrect');
+                if (input.value.trim() === input.dataset.answer) {
+                    input.classList.add('correct');
+                } else {
+                    input.classList.add('incorrect');
+                    allCorrect = false;
+                }
+            });
+            isPass = allCorrect;
         }
+        else if (currentStage === 3) {
+            const inputEl = document.getElementById('debug-input');
+            const userText = inputEl.value;
+            const cleanUser = userText.replace(/\s+/g, '');
+            const cleanOrig = originalCode.replace(/\s+/g, '');
+            if (cleanUser === cleanOrig) { // user fixed the bug back to original
+                inputEl.classList.add('correct');
+                isPass = true;
+            } else {
+                inputEl.classList.add('incorrect');
+            }
+        }
+        else if (currentStage === 4) {
+            const inputEl = document.getElementById('trace-input');
+            if (inputEl.value.trim().length > 0) { // Accept any non-empty for dummy
+                isPass = true;
+            } else {
+                inputEl.style.borderColor = 'var(--error)';
+            }
+        }
+        else if (currentStage === 5) {
+            const inputEl = document.getElementById('challenge-input');
+            if (inputEl.value.trim().length > 10) { // Accept any decent attempt for dummy
+                isPass = true;
+            } else {
+                inputEl.classList.add('incorrect');
+            }
+        }
+
+        if (isPass) {
+            setTimeout(() => {
+                currentStage++;
+                if (currentStage > 5) {
+                    finishAllStages();
+                } else {
+                    startStage(currentStage);
+                }
+            }, 800);
+        }
+    }
+
+    function finishAllStages() {
+        progressBarFill.style.width = '100%';
+        progressText.textContent = `진행률: 100%`;
+        resultModal.classList.add('active');
     }
 
     // Modal Actions
@@ -182,8 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     copyResultBtn.addEventListener('click', () => {
         const name = studentNameInput.value.trim() || '익명 학생';
-        const modesMap = { blank: '빈칸 채우기' };
-        const textToCopy = `[학습 완료 인증]\n이름: ${name}\n학습 모드: ${modesMap[currentMode]}\n정답률: 100%`;
+        const textToCopy = `[학습 완료 인증]\n이름: ${name}\n학습 6단계 모두 완료!\n정답률: 100%`;
         navigator.clipboard.writeText(textToCopy).then(() => {
             const original = copyResultBtn.textContent;
             copyResultBtn.textContent = '복사 완료!';
@@ -196,11 +405,6 @@ document.addEventListener('DOMContentLoaded', () => {
         certName.textContent = name;
         captureArea.classList.add('certificate-mode');
         
-        // Cleanup UI for screenshot
-        document.querySelectorAll('.blank-input, .text-input, .bug-select').forEach(el => {
-            el.style.border = 'none'; el.style.background = 'transparent'; el.style.color = '#34d399';
-        });
-
         resultModal.classList.remove('active');
         try {
             const canvas = await html2canvas(captureArea, { backgroundColor: '#0f172a', scale: 2 });
@@ -211,9 +415,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) { alert('이미지 생성 실패'); } 
         finally {
             captureArea.classList.remove('certificate-mode');
-            document.querySelectorAll('.blank-input, .text-input, .bug-select').forEach(el => {
-                el.style.border = ''; el.style.background = ''; el.style.color = '';
-            });
             resultModal.classList.add('active');
         }
     });
