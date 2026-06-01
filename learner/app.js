@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
             typingCount = 0;
             if (currentStage > 5) {
                 alert('모든 단계를 완료했습니다!');
-                switchView('selection');
+                switchView('setup');
                 return;
             }
             startStage(currentStage);
