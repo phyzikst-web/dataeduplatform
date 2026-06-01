@@ -111,6 +111,13 @@ document.addEventListener('DOMContentLoaded', () => {
         dynamicWorkArea.innerHTML = '';
         modeData = {};
         updateProgress();
+        
+        // Reset button state
+        const checkBtn = document.getElementById('check-btn');
+        checkBtn.textContent = '정답 제출 / 다음 단계';
+        checkBtn.classList.remove('secondary-btn');
+        checkBtn.classList.add('success-btn');
+        isWaitingForNextTyping = false;
 
         switch (stage) {
             case 0:
@@ -152,31 +159,40 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Rendering Stages ---
 
     function renderTypingStage() {
-        // Original Code View
+        // Create a 2-column container
+        const flexContainer = document.createElement('div');
+        flexContainer.style.display = 'flex';
+        flexContainer.style.gap = '1.5rem';
+        flexContainer.style.alignItems = 'stretch';
+        
+        // Original Code View (Left)
         const origContainer = document.createElement('div');
         origContainer.className = 'code-cell';
-        origContainer.style.marginBottom = '1rem';
+        origContainer.style.flex = '1';
+        origContainer.style.margin = '0';
+        origContainer.style.overflowY = 'auto';
         origContainer.innerHTML = `<pre><code>${hljs.highlight(originalCode, {language: 'python'}).value}</code></pre>`;
-        dynamicWorkArea.appendChild(origContainer);
+        flexContainer.appendChild(origContainer);
 
-        // Typing Area
+        // Typing Area (Right)
         const textArea = document.createElement('textarea');
         textArea.id = 'typing-input';
         textArea.className = 'notebook-code-editor';
         textArea.placeholder = "여기에 코드를 타이핑하세요...";
-        textArea.style.minHeight = '200px';
+        textArea.style.flex = '1';
+        textArea.style.minHeight = '300px';
         textArea.style.background = '#0f172a';
         textArea.style.padding = '1rem';
         textArea.style.borderRadius = '8px';
         textArea.style.border = '1px solid var(--border-color)';
+        textArea.style.resize = 'none'; // Disable resize to keep layout clean
         
         textArea.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
             this.classList.remove('correct', 'incorrect');
         });
         
-        dynamicWorkArea.appendChild(textArea);
+        flexContainer.appendChild(textArea);
+        dynamicWorkArea.appendChild(flexContainer);
     }
 
     function renderBlankStage(difficultyRatio) {
@@ -301,11 +317,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Checking Logic ---
 
+    let isWaitingForNextTyping = false;
+
     function checkCurrentStage() {
         let isPass = false;
+        const checkBtn = document.getElementById('check-btn');
 
         if (currentStage === 0) {
             const inputEl = document.getElementById('typing-input');
+            
+            // If we are currently waiting for user to acknowledge success and start next repeat
+            if (isWaitingForNextTyping) {
+                isWaitingForNextTyping = false;
+                inputEl.value = '';
+                inputEl.classList.remove('correct');
+                checkBtn.textContent = '정답 제출 / 다음 단계';
+                checkBtn.classList.remove('secondary-btn');
+                checkBtn.classList.add('success-btn');
+                return;
+            }
+
             const userText = inputEl.value;
             // Ignore whitespace for similarity
             const cleanUser = userText.replace(/\s+/g, '');
@@ -313,15 +344,17 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (cleanUser === cleanOrig) {
                 inputEl.classList.add('correct');
-                isPass = true;
                 typingCount++;
+                updateProgress();
+                
                 if (typingCount < MAX_TYPING) {
-                    setTimeout(() => {
-                        inputEl.value = '';
-                        inputEl.classList.remove('correct');
-                        updateProgress();
-                    }, 1000);
+                    isWaitingForNextTyping = true;
+                    checkBtn.textContent = `성공! ${typingCount}/${MAX_TYPING} 완료 (클릭하여 다음 반복 시작)`;
+                    checkBtn.classList.remove('success-btn');
+                    checkBtn.classList.add('secondary-btn');
                     return; // Don't advance stage yet
+                } else {
+                    isPass = true; // All 3 repeats done
                 }
             } else {
                 inputEl.classList.add('incorrect');
