@@ -220,7 +220,9 @@ document.addEventListener('DOMContentLoaded', () => {
         modeData = { parsedTokens, blankIndices };
 
         const container = document.createElement('div');
-        container.className = 'code-container notebook-view';
+        container.className = 'code-cell';
+        container.style.lineHeight = '1.8'; // Add some line height for inputs
+        container.style.fontSize = '1.05rem';
         const pre = document.createElement('pre');
         const code = document.createElement('code');
         pre.appendChild(code);
@@ -247,7 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const dummyBugCode = originalCode.replace(/return/g, "break"); // Simple dummy bug
         
         const container = document.createElement('div');
-        container.className = 'code-container notebook-view';
+        container.className = 'code-cell';
         
         const textArea = document.createElement('textarea');
         textArea.id = 'debug-input';
