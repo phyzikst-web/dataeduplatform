@@ -88,6 +88,20 @@ document.addEventListener('DOMContentLoaded', () => {
         checkCurrentStage();
     });
 
+    const skipBtn = document.getElementById('skip-btn');
+    if (skipBtn) {
+        skipBtn.addEventListener('click', () => {
+            currentStage++;
+            typingCount = 0;
+            if (currentStage > 5) {
+                alert('모든 단계를 완료했습니다!');
+                switchView('selection');
+                return;
+            }
+            startStage(currentStage);
+        });
+    }
+
     function switchView(viewName) {
         Object.values(views).forEach(v => v.classList.remove('active'));
         views[viewName].classList.add('active');
@@ -236,7 +250,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 input.dataset.answer = token.value;
                 input.maxLength = token.value.length + 5;
                 input.style.width = `${Math.max(3, token.value.length)}ch`;
-                input.addEventListener('input', () => input.classList.remove('correct', 'incorrect'));
+                input.addEventListener('input', () => {
+                    input.classList.remove('correct', 'incorrect');
+                    const val = input.value.trim();
+                    if (val === token.value) {
+                        input.classList.add('correct');
+                    } else if (val.length > 0) {
+                        input.classList.add('incorrect');
+                    }
+                });
                 code.appendChild(input);
             } else {
                 code.appendChild(document.createTextNode(token.value));
