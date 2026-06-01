@@ -159,17 +159,23 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Rendering Stages ---
 
     function renderTypingStage() {
+        // Calculate estimated height based on code lines
+        const lines = originalCode.split('\n').length;
+        const exactHeight = Math.max(300, (lines * 24) + 60) + 'px'; // 24px per line + padding
+
         // Create a 2-column container
         const flexContainer = document.createElement('div');
         flexContainer.style.display = 'flex';
         flexContainer.style.gap = '1.5rem';
         flexContainer.style.alignItems = 'stretch';
+        flexContainer.style.height = exactHeight;
         
         // Original Code View (Left)
         const origContainer = document.createElement('div');
         origContainer.className = 'code-cell';
         origContainer.style.flex = '1';
         origContainer.style.margin = '0';
+        origContainer.style.height = '100%';
         origContainer.style.overflowY = 'auto';
         origContainer.innerHTML = `<pre><code>${hljs.highlight(originalCode, {language: 'python'}).value}</code></pre>`;
         flexContainer.appendChild(origContainer);
@@ -180,12 +186,14 @@ document.addEventListener('DOMContentLoaded', () => {
         textArea.className = 'notebook-code-editor';
         textArea.placeholder = "여기에 코드를 타이핑하세요...";
         textArea.style.flex = '1';
-        textArea.style.minHeight = '300px';
+        textArea.style.height = '100%';
+        textArea.style.margin = '0';
         textArea.style.background = '#0f172a';
-        textArea.style.padding = '1rem';
+        textArea.style.padding = '1.25rem';
         textArea.style.borderRadius = '8px';
         textArea.style.border = '1px solid var(--border-color)';
         textArea.style.resize = 'none'; // Disable resize to keep layout clean
+        textArea.style.overflowY = 'auto';
         
         textArea.addEventListener('input', function() {
             this.classList.remove('correct', 'incorrect');
