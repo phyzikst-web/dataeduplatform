@@ -8,10 +8,8 @@ class JSNotebook {
         this.initSandbox();
         this.setupEventListeners();
         
-        // Add initial cells
-        this.addCell("# 자바스크립트 노트북\n\n여기에 마크다운으로 설명을 적을 수 있습니다.\n아래 셀의 자바스크립트 코드를 실행해보세요.", 'markdown');
-        this.runCell(1); // 렌더링
-        this.addCell("let a = 10;\nconsole.log('변수 a가 선언되었습니다: ', a);");
+        // Add initial empty cell
+        this.addCell();
     }
 
     initSandbox() {
