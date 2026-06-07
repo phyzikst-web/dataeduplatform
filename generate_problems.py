@@ -3,6 +3,7 @@ import json
 import re
 
 labs_dir = 'labs'
+answers_dir = os.path.join(labs_dir, 'ch09_answers')
 output_file = 'html5/js-notebook/problems.js'
 
 problems = []
@@ -10,6 +11,16 @@ problems = []
 # Get all lab files and sort them
 lab_files = [f for f in os.listdir(labs_dir) if f.startswith('lab') and f.endswith('.js')]
 lab_files.sort()
+
+# Get all answer files and build a lookup by number
+answer_map = {}
+if os.path.isdir(answers_dir):
+    for af in os.listdir(answers_dir):
+        if af.startswith('ans') and af.endswith('.js'):
+            # ans01_variables.js -> "01"
+            num = re.match(r'ans(\d+)', af)
+            if num:
+                answer_map[num.group(1)] = af
 
 for filename in lab_files:
     filepath = os.path.join(labs_dir, filename)
@@ -64,12 +75,36 @@ for filename in lab_files:
 
     problem_id = filename.split('.')[0]
     
-    problems.append({
+    # Extract lab number: lab01_variables -> "01"
+    lab_num = re.match(r'lab(\d+)', filename)
+    lab_num_str = lab_num.group(1) if lab_num else None
+
+    problem_data = {
         'id': problem_id,
         'title': title,
         'markdown': '\n'.join(markdown_lines).strip(),
         'code': '\n'.join(code_lines).strip()
-    })
+    }
+
+    # Load answer code if available
+    if lab_num_str and lab_num_str in answer_map:
+        ans_filepath = os.path.join(answers_dir, answer_map[lab_num_str])
+        with open(ans_filepath, 'r', encoding='utf-8') as f:
+            ans_content = f.read()
+        # Strip comment header lines (// === ... and // 실습 ... [정답])
+        ans_lines = []
+        for aline in ans_content.split('\n'):
+            if aline.startswith('// ===') or (aline.startswith('//') and '[정답]' in aline):
+                continue
+            ans_lines.append(aline)
+        # Trim
+        while ans_lines and ans_lines[-1].strip() == '':
+            ans_lines.pop()
+        while ans_lines and ans_lines[0].strip() == '':
+            ans_lines.pop(0)
+        problem_data['answerCode'] = '\n'.join(ans_lines).strip()
+
+    problems.append(problem_data)
 
 # Write to problems.js
 js_content = f"window.JS_PROBLEMS = {json.dumps(problems, ensure_ascii=False, indent=2)};"

@@ -78,7 +78,12 @@ class JSNotebook {
                 state[0].code = problem.markdown;
             }
 
-            state.forEach(cell => {
+            // 빈 코드 셀 제거 (불필요한 빈 셀이 쌓이는 문제 방지)
+            const filteredState = state.filter(cell => 
+                cell.type === 'markdown' || (cell.code && cell.code.trim() !== '')
+            );
+
+            filteredState.forEach(cell => {
                 const cellId = this.addCell(cell.code, cell.type);
                 if (cell.type === 'markdown') {
                     this.runCell(cellId);
@@ -297,13 +302,28 @@ class JSNotebook {
         
         headerSpan.textContent = `[*] Running...`;
         
+        // 학생 코드 출력을 수집할 배열
+        const studentLogs = [];
+        const origCaptureLog = this.captureLog.bind(this);
+        
+        // captureLog를 임시로 래핑하여 학생 출력을 수집
+        const origMethod = this.captureLog;
+        this.captureLog = (type, args) => {
+            if (type !== 'error') {
+                studentLogs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '));
+            }
+            origMethod.call(this, type, args);
+        };
+        
         try {
             const win = this.iframe.contentWindow;
             const doc = win.document;
             
-            // eval 대신 script 태그를 삽입해야 let, const가 글로벌 컨텍스트(iframe 내)에 유지됨
+            // 같은 셀을 여러 번 실행할 때 'Identifier has already been declared' 에러 방지
+            const safeCode = code.replace(/\blet\s+/g, 'var ').replace(/\bconst\s+/g, 'var ');
+            
             const script = doc.createElement('script');
-            script.textContent = code;
+            script.textContent = safeCode;
             doc.body.appendChild(script);
             
             headerSpan.textContent = `[${cellId}] JS Code Cell`;
@@ -313,12 +333,77 @@ class JSNotebook {
             headerSpan.textContent = `[!] Error`;
         }
         
+        // captureLog 복원
+        this.captureLog = origMethod;
+        
+        // 정답 코드 출력 비교 (answerCode가 있는 문제일 때만)
+        if (this.currentProblem && this.currentProblem !== 'free-practice' && cell.type === 'code') {
+            const problem = window.JS_PROBLEMS.find(p => p.id === this.currentProblem);
+            if (problem && problem.answerCode) {
+                try {
+                    const expectedLogs = this.runAnswerCode(problem.answerCode);
+                    const studentOutput = studentLogs.join('\n').trim();
+                    const expectedOutput = expectedLogs.join('\n').trim();
+                    
+                    if (studentOutput.length > 0 && studentOutput === expectedOutput) {
+                        // 정답
+                        const line = document.createElement('div');
+                        line.className = 'out-log';
+                        line.style.cssText = 'color: #4caf50; font-weight: bold; margin-top: 8px; padding: 6px 10px; background: rgba(76,175,80,0.1); border-radius: 4px; border-left: 3px solid #4caf50;';
+                        line.textContent = '✅ 정답입니다! 잘하셨습니다!';
+                        outputEl.appendChild(line);
+                        outputEl.classList.add('has-content');
+                    } else if (studentOutput.length > 0) {
+                        // 오답
+                        const line = document.createElement('div');
+                        line.className = 'out-log';
+                        line.style.cssText = 'color: #ff9800; font-weight: bold; margin-top: 8px; padding: 6px 10px; background: rgba(255,152,0,0.1); border-radius: 4px; border-left: 3px solid #ff9800;';
+                        line.textContent = '❌ 출력 결과가 정답과 다릅니다. 다시 확인해 보세요.';
+                        outputEl.appendChild(line);
+                        outputEl.classList.add('has-content');
+                    }
+                } catch (e) {
+                    // 정답 비교 중 오류 발생 시 무시
+                }
+            }
+        }
+        
         // 약간의 지연 후 실행 셀 포커스 해제 (비동기 로그 캡처를 위해)
         setTimeout(() => {
             if (this.currentExecutingCell === cellId) {
                 this.currentExecutingCell = null;
             }
         }, 100);
+    }
+
+    // 정답 코드를 별도 iframe에서 실행하여 출력 결과만 수집
+    runAnswerCode(answerCode) {
+        const logs = [];
+        const tempIframe = document.createElement('iframe');
+        tempIframe.style.display = 'none';
+        document.body.appendChild(tempIframe);
+        
+        const tempWin = tempIframe.contentWindow;
+        tempWin.console = {
+            log: (...args) => {
+                logs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '));
+            },
+            error: () => {},
+            warn: () => {},
+            info: () => {}
+        };
+        
+        try {
+            const safeAnswer = answerCode.replace(/\blet\s+/g, 'var ').replace(/\bconst\s+/g, 'var ');
+            const script = tempIframe.contentDocument.createElement('script');
+            script.textContent = safeAnswer;
+            tempIframe.contentDocument.body.appendChild(script);
+        } catch (e) {
+            // 정답 코드 실행 오류
+        }
+        
+        tempIframe.remove();
+        return logs;
     }
 
     runAll() {
