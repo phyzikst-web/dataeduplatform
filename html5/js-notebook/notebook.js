@@ -72,6 +72,12 @@ class JSNotebook {
         const savedState = localStorage.getItem(`js_notebook_state_${problemId}`);
         if (savedState) {
             const state = JSON.parse(savedState);
+            
+            // 항상 최신 문제 설명으로 덮어쓰기 (로컬 스토리지에 옛날 문제 설명이 남아있는 문제 해결)
+            if (state.length > 0 && state[0].type === 'markdown') {
+                state[0].code = problem.markdown;
+            }
+
             state.forEach(cell => {
                 const cellId = this.addCell(cell.code, cell.type);
                 if (cell.type === 'markdown') {
