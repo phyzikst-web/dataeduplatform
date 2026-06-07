@@ -160,19 +160,14 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-}
-
-.notebook-content {
-    width: 100%;
-    max-width: 900px;
-    display: flex;
-    flex-direction: column;
     gap: 20px;
     padding-bottom: 100px; /* Space at bottom */
 }
 
 /* Cell */
 .cell {
+    width: 100%;
+    max-width: 900px;
     display: flex;
     flex-direction: column;
     border: 1px solid var(--cell-border);
