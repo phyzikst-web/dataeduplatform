@@ -218,10 +218,12 @@ body {
 }
 
 .cell-editor {
+    width: 100%;
     font-size: 14px;
 }
 
 .CodeMirror {
+    width: 100% !important;
     height: auto;
     min-height: 50px;
     background: transparent !important;

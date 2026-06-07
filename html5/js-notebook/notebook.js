@@ -26,6 +26,13 @@ class JSNotebook {
             sidebar.classList.toggle('hidden');
         });
 
+        // Add Free Practice Item
+        const freePracticeLi = document.createElement('li');
+        freePracticeLi.textContent = '💡 자유 연습장';
+        freePracticeLi.dataset.id = 'free-practice';
+        freePracticeLi.addEventListener('click', () => this.loadFreePractice());
+        problemList.appendChild(freePracticeLi);
+
         window.JS_PROBLEMS.forEach(prob => {
             const li = document.createElement('li');
             li.textContent = prob.title;
@@ -58,6 +65,24 @@ class JSNotebook {
         this.addCell(problem.code, 'code');
         
         this.currentProblem = problemId;
+    }
+
+    loadFreePractice() {
+        // Update active class
+        document.querySelectorAll('.problem-list li').forEach(li => {
+            li.classList.toggle('active', li.dataset.id === 'free-practice');
+        });
+
+        // Clear existing cells
+        this.container.innerHTML = '';
+        this.cells = [];
+        this.nextCellId = 1;
+        this.restartKernel();
+
+        // Add empty code cell
+        this.addCell('', 'code');
+        
+        this.currentProblem = 'free-practice';
     }
 
     initSandbox() {
