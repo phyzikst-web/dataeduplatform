@@ -32,9 +32,14 @@ for filename in lab_files:
             # It's a comment line
             clean_line = line[2:].strip()
             
+            if clean_line.startswith('참고:') or clean_line.startswith('실행:'):
+                continue
+                
             # Extract title if it's the first line like "실습 XX - ..."
             if clean_line.startswith('실습'):
                 title = clean_line
+                markdown_lines.append('## ' + clean_line)
+                continue
             
             # Format markdown
             if clean_line.startswith('문제:'):
