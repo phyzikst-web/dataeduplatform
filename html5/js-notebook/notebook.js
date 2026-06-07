@@ -7,9 +7,57 @@ class JSNotebook {
         
         this.initSandbox();
         this.setupEventListeners();
+        this.initSidebar();
         
-        // Add initial empty cell
-        this.addCell();
+        // Add initial empty cell if no problem loaded
+        if (!this.currentProblem) {
+            this.addCell();
+        }
+    }
+
+    initSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const problemList = document.getElementById('problem-list');
+        const btnToggleSidebar = document.getElementById('btn-toggle-sidebar');
+        
+        if (!window.JS_PROBLEMS || window.JS_PROBLEMS.length === 0) return;
+        
+        btnToggleSidebar.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+        });
+
+        window.JS_PROBLEMS.forEach(prob => {
+            const li = document.createElement('li');
+            li.textContent = prob.title;
+            li.dataset.id = prob.id;
+            li.addEventListener('click', () => this.loadProblem(prob.id));
+            problemList.appendChild(li);
+        });
+    }
+
+    loadProblem(problemId) {
+        const problem = window.JS_PROBLEMS.find(p => p.id === problemId);
+        if (!problem) return;
+        
+        // Update active class
+        document.querySelectorAll('.problem-list li').forEach(li => {
+            li.classList.toggle('active', li.dataset.id === problemId);
+        });
+
+        // Clear existing cells
+        this.container.innerHTML = '';
+        this.cells = [];
+        this.nextCellId = 1;
+        this.restartKernel();
+
+        // Add problem markdown
+        const mdCellId = this.addCell(problem.markdown, 'markdown');
+        this.runCell(mdCellId);
+
+        // Add problem starter code
+        this.addCell(problem.code, 'code');
+        
+        this.currentProblem = problemId;
     }
 
     initSandbox() {
