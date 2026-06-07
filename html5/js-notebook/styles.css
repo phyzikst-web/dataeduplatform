@@ -13,6 +13,19 @@
     --btn-hover: #334155;
 }
 
+body.light-theme {
+    --bg-color: #f8fafc;
+    --text-color: #0f172a;
+    --text-secondary: #64748b;
+    --border-color: #cbd5e1;
+    --cell-bg: #ffffff;
+    --cell-border: #e2e8f0;
+    --cell-focus: #0ea5e9;
+    --output-bg: #f1f5f9;
+    --toolbar-bg: #ffffff;
+    --btn-hover: #f1f5f9;
+}
+
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
@@ -169,7 +182,7 @@ body {
     display: block;
 }
 
-.out-log { color: #e2e8f0; margin-bottom: 4px; }
+.out-log { color: var(--text-color); margin-bottom: 4px; }
 .out-error { color: var(--error); margin-bottom: 4px; }
 .out-return { color: var(--success); font-weight: bold; margin-top: 8px; }
 .out-return::before { content: "← "; color: var(--text-secondary); font-weight: normal; }

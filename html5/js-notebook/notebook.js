@@ -95,9 +95,10 @@ class JSNotebook {
         this.container.insertAdjacentHTML('beforeend', cellHtml);
         
         const textarea = document.getElementById(`editor-${cellId}`);
+        const isLight = document.body.classList.contains('light-theme');
         const cm = CodeMirror.fromTextArea(textarea, {
             mode: isMarkdown ? 'markdown' : 'javascript',
-            theme: 'dracula',
+            theme: isLight ? 'default' : 'dracula',
             lineNumbers: !isMarkdown,
             autoCloseBrackets: true,
             matchBrackets: true,
@@ -223,6 +224,16 @@ class JSNotebook {
         document.getElementById('btn-add-md-cell').addEventListener('click', () => this.addCell('', 'markdown'));
         document.getElementById('btn-run-all').addEventListener('click', () => this.runAll());
         document.getElementById('btn-restart').addEventListener('click', () => this.restartKernel());
+        document.getElementById('btn-toggle-theme').addEventListener('click', () => this.toggleTheme());
+    }
+
+    toggleTheme() {
+        const isLight = document.body.classList.toggle('light-theme');
+        const theme = isLight ? 'default' : 'dracula';
+        
+        this.cells.forEach(cell => {
+            cell.cm.setOption('theme', theme);
+        });
     }
 }
 
