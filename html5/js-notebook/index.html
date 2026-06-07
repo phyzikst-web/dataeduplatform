@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI DataEdu Platform | 자바스크립트 노트북</title>
+    <!-- CodeMirror Core -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/theme/dracula.min.css">
+    
+    <!-- CodeMirror JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.12/addon/edit/closebrackets.min.js"></script>
+    
+    <link rel="stylesheet" href="styles.css?v=20260607">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <a href="../index.html" style="color:var(--text-color); text-decoration:none;">←</a>
+            <span style="color:#f7df1e">JS</span> Notebook
+        </div>
+        
+        <div class="toolbar">
+            <button class="btn" id="btn-add-cell">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                코드 셀 추가
+            </button>
+            <button class="btn" id="btn-restart">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                커널 재시작 (초기화)
+            </button>
+            <button class="btn btn-primary" id="btn-run-all">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                모두 실행
+            </button>
+        </div>
+    </nav>
+
+    <!-- Notebook Container -->
+    <div class="notebook-container" id="notebook-container">
+        <div class="notebook-content" id="notebook-content">
+            <!-- Cells will be injected here dynamically -->
+        </div>
+        
+        <div class="add-cell-container">
+            <button class="add-cell-btn" onclick="notebook.addCell()">+ 새 셀 추가</button>
+        </div>
+    </div>
+
+    <script src="notebook.js?v=20260607"></script>
+</body>
+</html>

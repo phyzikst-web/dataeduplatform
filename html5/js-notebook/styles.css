@@ -1,0 +1,204 @@
+:root {
+    --bg-color: #0f172a;
+    --text-color: #f8fafc;
+    --text-secondary: #94a3b8;
+    --border-color: #334155;
+    --cell-bg: #1e293b;
+    --cell-border: #475569;
+    --cell-focus: #38bdf8;
+    --output-bg: #0b1120;
+    --success: #10b981;
+    --error: #ef4444;
+    --toolbar-bg: #1e293b;
+    --btn-hover: #334155;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Inter', -apple-system, sans-serif;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    height: 60px;
+    background: var(--toolbar-bg);
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.toolbar {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.btn:hover {
+    background: var(--btn-hover);
+}
+
+.btn-primary {
+    background: var(--cell-focus);
+    border-color: var(--cell-focus);
+    color: #0f172a;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background: #0ea5e9;
+}
+
+/* Notebook Container */
+.notebook-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.notebook-content {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding-bottom: 100px; /* Space at bottom */
+}
+
+/* Cell */
+.cell {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--cell-border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--cell-bg);
+    transition: border-color 0.2s;
+}
+
+.cell.focused {
+    border-color: var(--cell-focus);
+    box-shadow: 0 0 0 1px var(--cell-focus);
+}
+
+.cell-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px;
+    background: rgba(0,0,0,0.2);
+    border-bottom: 1px solid var(--cell-border);
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.cell-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.cell-action-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.cell-action-btn:hover {
+    color: var(--text-color);
+    background: rgba(255,255,255,0.1);
+}
+
+.cell-editor {
+    font-size: 14px;
+}
+
+.CodeMirror {
+    height: auto;
+    min-height: 50px;
+    background: transparent !important;
+}
+
+/* Output Area */
+.cell-output {
+    padding: 12px;
+    background: var(--output-bg);
+    border-top: 1px solid var(--cell-border);
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+    word-break: break-all;
+    display: none;
+}
+
+.cell-output.has-content {
+    display: block;
+}
+
+.out-log { color: #e2e8f0; margin-bottom: 4px; }
+.out-error { color: var(--error); margin-bottom: 4px; }
+.out-return { color: var(--success); font-weight: bold; margin-top: 8px; }
+.out-return::before { content: "← "; color: var(--text-secondary); font-weight: normal; }
+
+/* Add Cell Button Container */
+.add-cell-container {
+    display: flex;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+    margin: -10px 0;
+    z-index: 10;
+}
+
+.add-cell-container:hover, .notebook-content:empty + .add-cell-container {
+    opacity: 1;
+}
+
+.add-cell-btn {
+    background: var(--cell-bg);
+    border: 1px dashed var(--cell-border);
+    color: var(--text-secondary);
+    padding: 4px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.add-cell-btn:hover {
+    border-color: var(--cell-focus);
+    color: var(--cell-focus);
+}
