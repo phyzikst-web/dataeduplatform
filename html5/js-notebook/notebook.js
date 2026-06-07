@@ -67,7 +67,7 @@ class JSNotebook {
         this.cells = [];
         this.nextCellId = 1;
         this.currentProblem = problemId;
-        this.restartKernel();
+        this.restartKernel(true);
 
         const savedState = localStorage.getItem(`js_notebook_state_${problemId}`);
         if (savedState) {
@@ -101,7 +101,7 @@ class JSNotebook {
         this.cells = [];
         this.nextCellId = 1;
         this.currentProblem = 'free-practice';
-        this.restartKernel();
+        this.restartKernel(true);
 
         const savedState = localStorage.getItem(`js_notebook_state_free-practice`);
         if (savedState) {
@@ -319,14 +319,19 @@ class JSNotebook {
         this.cells.forEach(cell => this.runCell(cell.id));
     }
 
-    restartKernel() {
-        if (confirm('커널을 재시작하시겠습니까? 모든 변수와 실행 상태가 초기화됩니다.')) {
+    restartKernel(force = false) {
+        if (force || confirm('커널을 재시작하시겠습니까? 모든 변수와 실행 상태가 초기화됩니다.')) {
             this.initSandbox();
             this.cells.forEach(cell => {
                 const outputEl = document.getElementById(`output-${cell.id}`);
-                outputEl.innerHTML = '';
-                outputEl.classList.remove('has-content');
-                document.querySelector(`#cell-${cell.id} .cell-header span`).textContent = `[ ] JS Code Cell`;
+                if (outputEl) {
+                    outputEl.innerHTML = '';
+                    outputEl.classList.remove('has-content');
+                }
+                const headerSpan = document.querySelector(`#cell-${cell.id} .cell-header span`);
+                if (headerSpan) {
+                    headerSpan.textContent = `[ ] JS Code Cell`;
+                }
             });
             console.log("커널 재시작 완료");
         }
