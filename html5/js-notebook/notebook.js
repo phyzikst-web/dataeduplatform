@@ -42,7 +42,18 @@ class JSNotebook {
         });
     }
 
+    saveCurrentState() {
+        if (!this.currentProblem) return;
+        const state = this.cells.map(c => ({
+            type: c.type,
+            code: c.cm.getValue()
+        }));
+        localStorage.setItem(`js_notebook_state_${this.currentProblem}`, JSON.stringify(state));
+    }
+
     loadProblem(problemId) {
+        if (this.currentProblem) this.saveCurrentState();
+
         const problem = window.JS_PROBLEMS.find(p => p.id === problemId);
         if (!problem) return;
         
@@ -55,19 +66,31 @@ class JSNotebook {
         this.container.innerHTML = '';
         this.cells = [];
         this.nextCellId = 1;
+        this.currentProblem = problemId;
         this.restartKernel();
 
-        // Add problem markdown
-        const mdCellId = this.addCell(problem.markdown, 'markdown');
-        this.runCell(mdCellId);
+        const savedState = localStorage.getItem(`js_notebook_state_${problemId}`);
+        if (savedState) {
+            const state = JSON.parse(savedState);
+            state.forEach(cell => {
+                const cellId = this.addCell(cell.code, cell.type);
+                if (cell.type === 'markdown') {
+                    this.runCell(cellId);
+                }
+            });
+        } else {
+            // Add problem markdown
+            const mdCellId = this.addCell(problem.markdown, 'markdown');
+            this.runCell(mdCellId);
 
-        // Add problem starter code
-        this.addCell(problem.code, 'code');
-        
-        this.currentProblem = problemId;
+            // Add problem starter code
+            this.addCell(problem.code, 'code');
+        }
     }
 
     loadFreePractice() {
+        if (this.currentProblem) this.saveCurrentState();
+
         // Update active class
         document.querySelectorAll('.problem-list li').forEach(li => {
             li.classList.toggle('active', li.dataset.id === 'free-practice');
@@ -77,12 +100,22 @@ class JSNotebook {
         this.container.innerHTML = '';
         this.cells = [];
         this.nextCellId = 1;
+        this.currentProblem = 'free-practice';
         this.restartKernel();
 
-        // Add empty code cell
-        this.addCell('', 'code');
-        
-        this.currentProblem = 'free-practice';
+        const savedState = localStorage.getItem(`js_notebook_state_free-practice`);
+        if (savedState) {
+            const state = JSON.parse(savedState);
+            state.forEach(cell => {
+                const cellId = this.addCell(cell.code, cell.type);
+                if (cell.type === 'markdown') {
+                    this.runCell(cellId);
+                }
+            });
+        } else {
+            // Add empty code cell
+            this.addCell('', 'code');
+        }
     }
 
     initSandbox() {
@@ -183,7 +216,12 @@ class JSNotebook {
         // 포커스 스타일링
         cm.on('focus', () => document.getElementById(`cell-${cellId}`).classList.add('focused'));
         cm.on('blur', () => document.getElementById(`cell-${cellId}`).classList.remove('focused'));
-        
+        cm.on('change', () => {
+            // Delay save slightly to avoid saving constantly on every keystroke
+            clearTimeout(this.saveTimeout);
+            this.saveTimeout = setTimeout(() => this.saveCurrentState(), 500);
+        });
+
         // 단축키 실행
         cm.setOption("extraKeys", {
             "Ctrl-Enter": () => this.runCell(cellId),
@@ -209,8 +247,12 @@ class JSNotebook {
         if (this.cells.length <= 1) return; // 최소 1개는 유지
         
         if (confirm('이 셀을 삭제하시겠습니까?')) {
-            document.getElementById(`cell-${cellId}`).remove();
-            this.cells = this.cells.filter(c => c.id !== cellId);
+            const idx = this.cells.findIndex(c => c.id === cellId);
+            if (idx !== -1) {
+                this.cells.splice(idx, 1);
+                document.getElementById(`cell-${cellId}`).remove();
+                this.saveCurrentState();
+            }
         }
     }
 
