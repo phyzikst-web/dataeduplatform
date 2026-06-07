@@ -152,19 +152,12 @@ class JSNotebook {
         
         try {
             const win = this.iframe.contentWindow;
+            const doc = win.document;
             
-            // eval을 사용하여 IFrame 전역 스코프에서 실행
-            // return 값을 얻기 위해 약간의 트릭 사용 (마지막 구문이 표현식이면 반환)
-            // 브라우저 eval은 마지막 식의 평가값을 반환함
-            let result = win.eval(code);
-            
-            if (result !== undefined) {
-                const retLine = document.createElement('div');
-                retLine.className = 'out-return';
-                retLine.textContent = typeof result === 'object' ? JSON.stringify(result) : String(result);
-                outputEl.appendChild(retLine);
-                outputEl.classList.add('has-content');
-            }
+            // eval 대신 script 태그를 삽입해야 let, const가 글로벌 컨텍스트(iframe 내)에 유지됨
+            const script = doc.createElement('script');
+            script.textContent = code;
+            doc.body.appendChild(script);
             
             headerSpan.textContent = `[${cellId}] JS Code Cell`;
             
@@ -173,7 +166,12 @@ class JSNotebook {
             headerSpan.textContent = `[!] Error`;
         }
         
-        this.currentExecutingCell = null;
+        // 약간의 지연 후 실행 셀 포커스 해제 (비동기 로그 캡처를 위해)
+        setTimeout(() => {
+            if (this.currentExecutingCell === cellId) {
+                this.currentExecutingCell = null;
+            }
+        }, 100);
     }
 
     runAll() {
