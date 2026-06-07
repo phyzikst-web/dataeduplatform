@@ -174,6 +174,40 @@ body {
 .out-return { color: var(--success); font-weight: bold; margin-top: 8px; }
 .out-return::before { content: "← "; color: var(--text-secondary); font-weight: normal; }
 
+/* Markdown Preview */
+.markdown-preview {
+    padding: 16px 24px;
+    background: var(--cell-bg);
+    line-height: 1.6;
+    color: var(--text-color);
+}
+
+.markdown-preview h1, .markdown-preview h2, .markdown-preview h3 {
+    margin-top: 0;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
+}
+
+.markdown-preview code {
+    background: var(--output-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9em;
+}
+
+.markdown-preview pre {
+    background: var(--output-bg);
+    padding: 12px;
+    border-radius: 6px;
+    overflow-x: auto;
+}
+
+.markdown-preview pre code {
+    background: transparent;
+    padding: 0;
+}
+
 /* Add Cell Button Container */
 .add-cell-container {
     display: flex;

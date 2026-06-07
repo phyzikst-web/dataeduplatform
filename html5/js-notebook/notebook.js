@@ -8,7 +8,9 @@ class JSNotebook {
         this.initSandbox();
         this.setupEventListeners();
         
-        // Add initial cell
+        // Add initial cells
+        this.addCell("# 자바스크립트 노트북\n\n여기에 마크다운으로 설명을 적을 수 있습니다.\n아래 셀의 자바스크립트 코드를 실행해보세요.", 'markdown');
+        this.runCell(1); // 렌더링
         this.addCell("let a = 10;\nconsole.log('변수 a가 선언되었습니다: ', a);");
     }
 
@@ -66,22 +68,27 @@ class JSNotebook {
         outputEl.classList.add('has-content');
     }
 
-    addCell(initialCode = '') {
+    addCell(initialCode = '', type = 'code') {
         const cellId = this.nextCellId++;
         
+        const isMarkdown = type === 'markdown';
+        const cellTitle = isMarkdown ? 'Markdown Cell' : 'JS Code Cell';
+        const btnAction = isMarkdown ? '렌더링' : '실행';
+        
         const cellHtml = `
-            <div class="cell" id="cell-${cellId}">
+            <div class="cell ${isMarkdown ? 'markdown-cell' : ''}" id="cell-${cellId}" data-type="${type}">
                 <div class="cell-header">
-                    <span>[ ] JS Code Cell</span>
+                    <span>[ ] ${cellTitle}</span>
                     <div class="cell-actions">
-                        <button class="cell-action-btn" onclick="notebook.runCell(${cellId})" title="실행 (Ctrl+Enter)">▶ 실행</button>
+                        ${isMarkdown ? `<button class="cell-action-btn" onclick="notebook.editMarkdown(${cellId})" title="수정 (더블클릭)">✎ 수정</button>` : ''}
+                        <button class="cell-action-btn" onclick="notebook.runCell(${cellId})" title="${btnAction} (Ctrl+Enter)">▶ ${btnAction}</button>
                         <button class="cell-action-btn" onclick="notebook.deleteCell(${cellId})" title="삭제">✕</button>
                     </div>
                 </div>
-                <div class="cell-editor">
+                <div class="cell-editor" id="editor-container-${cellId}">
                     <textarea id="editor-${cellId}"></textarea>
                 </div>
-                <div class="cell-output" id="output-${cellId}"></div>
+                ${isMarkdown ? `<div class="markdown-preview" id="preview-${cellId}" style="display:none;" ondblclick="notebook.editMarkdown(${cellId})"></div>` : `<div class="cell-output" id="output-${cellId}"></div>`}
             </div>
         `;
         
@@ -89,9 +96,9 @@ class JSNotebook {
         
         const textarea = document.getElementById(`editor-${cellId}`);
         const cm = CodeMirror.fromTextArea(textarea, {
-            mode: 'javascript',
+            mode: isMarkdown ? 'markdown' : 'javascript',
             theme: 'dracula',
-            lineNumbers: true,
+            lineNumbers: !isMarkdown,
             autoCloseBrackets: true,
             matchBrackets: true,
             indentUnit: 4,
@@ -120,7 +127,7 @@ class JSNotebook {
             }
         });
 
-        this.cells.push({ id: cellId, cm: cm });
+        this.cells.push({ id: cellId, cm: cm, type: type });
         cm.focus();
         
         return cellId;
@@ -135,13 +142,33 @@ class JSNotebook {
         }
     }
 
+    editMarkdown(cellId) {
+        const cell = this.cells.find(c => c.id === cellId);
+        if (!cell || cell.type !== 'markdown') return;
+        
+        document.getElementById(`preview-${cellId}`).style.display = 'none';
+        document.getElementById(`editor-container-${cellId}`).style.display = 'block';
+        cell.cm.focus();
+    }
+
     runCell(cellId) {
         const cell = this.cells.find(c => c.id === cellId);
         if (!cell) return;
         
         const code = cell.cm.getValue();
-        const outputEl = document.getElementById(`output-${cellId}`);
         const headerSpan = document.querySelector(`#cell-${cellId} .cell-header span`);
+        
+        if (cell.type === 'markdown') {
+            const previewEl = document.getElementById(`preview-${cellId}`);
+            const editorEl = document.getElementById(`editor-container-${cellId}`);
+            previewEl.innerHTML = marked.parse(code);
+            previewEl.style.display = 'block';
+            editorEl.style.display = 'none';
+            headerSpan.textContent = `[M] Markdown Cell`;
+            return;
+        }
+        
+        const outputEl = document.getElementById(`output-${cellId}`);
         
         // 출력창 초기화
         outputEl.innerHTML = '';
@@ -192,7 +219,8 @@ class JSNotebook {
     }
     
     setupEventListeners() {
-        document.getElementById('btn-add-cell').addEventListener('click', () => this.addCell());
+        document.getElementById('btn-add-cell').addEventListener('click', () => this.addCell('', 'code'));
+        document.getElementById('btn-add-md-cell').addEventListener('click', () => this.addCell('', 'markdown'));
         document.getElementById('btn-run-all').addEventListener('click', () => this.runAll());
         document.getElementById('btn-restart').addEventListener('click', () => this.restartKernel());
     }
